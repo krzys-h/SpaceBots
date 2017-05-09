@@ -1,38 +1,60 @@
-// Extend Element with utility functions...
+// Welcome to SpaceBots, game where robots controlled by AI and human
+// players compete to create thriving industry, accumulate resources
+// and secure rare and efficient machines.
 
-Element.prototype.fadeOut = function() {
-  this.style['-webkit-animation'] = 'slideOut 500ms';
-  this.addEventListener('webkitAnimationEnd', function() {
-    this.remove();
-  });
-};
+// This game is meant to be operated from built-in browser
+// console. You can invoke it depending on your browser:
 
-Element.prototype.remove = function() {
-  this.parentElement.removeChild(this);
-};
+// Chrome: Shift + Ctrl + J
+// Firefox: Shift + Ctrl + K (you may disable CSS and Network buttons)
 
-NodeList.prototype.remove = HTMLCollection.prototype.remove = function() {
-  for(var i = 0, len = this.length; i < len; i++) {
-    if(this[i] && this[i].parentElement) {
-      this[i].parentElement.removeChild(this[i]);
-    }
-  }
-};
+// If you have done everything properly, you should be reading the
+// same file but from the inside of your browser :)
 
-NodeList.prototype.text = HTMLCollection.prototype.text = function(text) {
-  for(var i = 0, len = this.length; i < len; i++) {
-    if(this[i]) {
-      this[i].textContent = text;
-    }
-  }
-};
+// These are the commands that most probably brought you here:
 
-// Logging function
+console.log('%cWelcome to SpaceBots! For a complete tutorial, navigate to ' +
+  '"Elements" tab and click on link to "base.js"', 'font-size: x-large');
 
-var log = console.log.bind(console);
-var error = console.log.bind(error);
-var info = console.log.bind(info);
-var warn = console.log.bind(warn);
+// To stop intro message from showing up every time you refresh the
+// page, try writing following command into the console:
+// localStarage.inhibitIntro = 'true';
+
+// If you set it this way, it will remove #intro element.
+if(localStorage.inhibitIntro) {
+  document.getElementById('introtext').remove();
+} else {
+  // Otherwise it will show you the invitation and register click
+  // handler to hide it.
+  document.getElementById('introtext').textContent =
+    'Welcome to SpaceBots! For a complete tutorial, press F12 and navigate to "base.js".';
+
+  document.getElementById('introtext').
+  addEventListener('click', function(e) {
+    e.target.remove();
+  }, false);
+}
+
+// Simple isn't it? You have just enabled the 'if' statement a few
+// lines upwards from here :D
+
+// You will constantly be using Javascript to learn game mechanics, to
+// automate boring chores and to write any tools you like that help
+// you in the game.  We will teach you how to do it, don't worry if
+// you are a javascript newbie.
+
+// It is a good idea to take at least a short course on javascript
+// before reading rest of the source code. This way you will
+// understand the basics.  Examples from the code will help you even
+// better understand the language.
+
+// The code is filled with excercises so you can really understand
+// mechanics governing various parts of the game. In the meantime you
+// will learn some really neat programming tricks, so even if you are
+// an expert programmer, taking this tutorial will have some benefit.
+
+// Having said all the basics nessessary, we can begin the tour of the
+// source code.
 
 // We will start by running custom startup scripts. Initially there
 // won't be any of them but you can create them, put them on the
@@ -60,8 +82,6 @@ var warn = console.log.bind(warn);
 // this would be:
 
 // chromium --allow-file-access
-
-// Enough about plugins. Let's get back to the game.
 
 var run_script = function(data, title) {
 
@@ -102,9 +122,57 @@ var run_script = function(data, title) {
   var script_set = JSON.parse(localStorage.custom_scripts || '{}');
   for(var name in script_set) {
     run_script(script_set[name]);
-  }; 
+  }
 })();
 
+
+// Enough about plugins. Let's get back to the game.
+
+// The next important point in the source code is the logging_in.js file
+// Open it now to continue the tour of the source code!
+
+
+
+
+// TODO: clean this up
+
+
+// Logging function
+
+var log = console.log.bind(console);
+var error = console.log.bind(error);
+var info = console.log.bind(info);
+var warn = console.log.bind(warn);
+
+
+// Extend Element with utility functions...
+
+Element.prototype.fadeOut = function() {
+  this.style['-webkit-animation'] = 'slideOut 500ms';
+  this.addEventListener('webkitAnimationEnd', function() {
+    this.remove();
+  });
+};
+
+Element.prototype.remove = function() {
+  this.parentElement.removeChild(this);
+};
+
+NodeList.prototype.remove = HTMLCollection.prototype.remove = function() {
+  for(var i = 0, len = this.length; i < len; i++) {
+    if(this[i] && this[i].parentElement) {
+      this[i].parentElement.removeChild(this[i]);
+    }
+  }
+};
+
+NodeList.prototype.text = HTMLCollection.prototype.text = function(text) {
+  for(var i = 0, len = this.length; i < len; i++) {
+    if(this[i]) {
+      this[i].textContent = text;
+    }
+  }
+};
 
 document.addEventListener('mousedown', function(e) {
   if(e.button === 0) {

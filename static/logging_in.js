@@ -1,39 +1,3 @@
-// Welcome to SpaceBots, game where robots controlled by AI and human
-// players compete to create thriving industry, accumulate resources
-// and secure rare and efficient machines.
-
-// This game is meant to be operated from built-in browser
-// console. You can invoke it depending on your browser:
-
-// Chrome: Shift + Ctrl + J
-// Firefox: Shift + Ctrl + K (you may disable CSS and Network buttons)
-
-// If you have done everything properly, you should be reading the
-// same file but from the inside of your browser :)
-
-// We will show you how to interact with the game. Let's start with
-// ... XXX
-
-// Simple isn't it? You have just enabled the 'if' statement a few
-// lines upwards from here :D
-
-// You will constantly be using Javascript to learn game mechanics, to
-// automate boring chores and to write any tools you like that help
-// you in the game.  We will teach you how to do it, don't worry if
-// you are a javascript newbie.
-
-// It is a good idea to take at least a short course on javascript
-// before reading rest of the source code. This way you will
-// understand the basics.  Examples from the code will help you even
-// better understand the language.
-
-// The code is filled with excercises so you can really understand
-// mechanics governing various parts of the game. In the meantime you
-// will learn some really neat programming tricks, so even if you are
-// an expert programmer, taking this tutorial will have some benefit.
-
-// Having said all the basics nessessary, we can begin the tour of the
-// source code.
 
 // The game is operated through a live connection with its
 // server. Here is the line that uses socket.io library to create
