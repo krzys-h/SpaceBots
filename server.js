@@ -562,22 +562,22 @@ io.sockets.on('connection', function (socket) {
     var hub = find_co_component(target, data.hub, 'hub');
     if(typeof data.hub_slot !== 'number')
       return fail(999, 'hub slot should be a number.');
-    var idx = Math.round(data.skeleton_slot);
+    var idx = Math.round(data.hub_slot);
     if(idx < 0)
-      return fail(999, 'Specified skeleton doesn\'t have negative slots.');
-    if(idx >= skeleton.skeleton_slots.length)
-      return fail(999, 'Specified skeleton doesn\'t have that many slots.');
-    if(skeleton.skeleton_slots[idx])
-      return fail(999, 'Skeleton '+data.skeleton+' slot '+idx+' occupied by '+skeleton.skeleton_slots[idx].id+'.');
+      return fail(999, 'Specified hub doesn\'t have negative slots.');
+    if(idx >= hub.hub_slots.length)
+      return fail(999, 'Specified hub doesn\'t have that many slots.');
+    if(hub.hub_slots[idx])
+      return fail(999, 'hub '+data.hub+' slot '+idx+' occupied by '+hub.hub_slots[idx].id+'.');
 
     var o = target.manipulator_slot;
-    skeleton.skeleton_slots[idx] = o;
-    o.parent = skeleton;
+    hub.hub_slots[idx] = o;
+    o.parent = hub;
     delete target.manipulator_slot.position;
     delete target.manipulator_slot.velocity;
     delete target.manipulator_slot.grabbed_by;
     delete target.manipulator_slot;
-    socket.emit('manipulator attached', { manipulator: { id: target.id }, skeleton: { id: skeleton.id }, slot: idx, object: { id: o.id } });
+    socket.emit('manipulator attached', { manipulator: { id: target.id }, hub: { id: hub.id }, slot: idx, object: { id: o.id } });
   });
 
   on('manipulator detach', function(target, data) {
@@ -585,24 +585,24 @@ io.sockets.on('connection', function (socket) {
       return;
     if(typeof target.manipulator_slot !== 'undefined')
       return fail(999, 'Manipulator not empty');
-    var skeleton = find_co_component(target, data.skeleton, 'skeleton');
-    if(typeof data.skeleton_slot !== 'number')
-      return fail(999, 'Skeleton slot should be a number.');
-    var idx = Math.round(data.skeleton_slot);
+    var hub = find_co_component(target, data.hub, 'hub');
+    if(typeof data.hub_slot !== 'number')
+      return fail(999, 'hub slot should be a number.');
+    var idx = Math.round(data.hub_slot);
     if(idx < 0)
-      return fail(999, 'Specified skeleton doesn\'t have negative slots.');
-    if(idx >= skeleton.skeleton_slots.length)
-      return fail(999, 'Specified skeleton doesn\'t have that many slots.');
-    if(!skeleton.skeleton_slots[idx])
-      return fail(999, 'Nothing in skeleton '+data.skeleton+' slot '+idx+'.');
+      return fail(999, 'Specified hub doesn\'t have negative slots.');
+    if(idx >= hub.hub_slots.length)
+      return fail(999, 'Specified hub doesn\'t have that many slots.');
+    if(!hub.hub_slots[idx])
+      return fail(999, 'Nothing in hub '+data.hub+' slot '+idx+'.');
 
-    target.manipulator_slot = skeleton.skeleton_slots[idx];
-    skeleton.skeleton_slots[idx] = null;
+    target.manipulator_slot = hub.hub_slots[idx];
+    hub.hub_slots[idx] = null;
     delete target.manipulator_slot.parent;
     target.manipulator_slot.grabbed_by = target;
     target.manipulator_slot.position = vectors.create(common.get_root(target).position);
     target.manipulator_slot.velocity = vectors.create(common.get_root(target).velocity);
-    socket.emit('manipulator detached', { manipulator: stub(target), skeleton: stub(skeleton), slot: idx, object: stub(target.manipulator_slot) });
+    socket.emit('manipulator detached', { manipulator: stub(target), hub: stub(hub), slot: idx, object: stub(target.manipulator_slot) });
   });
 
   on('manipulator release', function(target, data) {

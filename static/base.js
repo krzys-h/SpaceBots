@@ -104,3 +104,19 @@ var run_script = function(data, title) {
     run_script(script_set[name]);
   }; 
 })();
+
+
+document.addEventListener('mousedown', function(e) {
+  if(e.button === 0) {
+    if (e.target.classList.contains('run') && e.target.parentNode.classList.contains('command')) {
+      var command = e.target.parentNode;
+
+      console.group(command.textContent);
+      eval(command.textContent);
+      console.groupEnd();
+
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }
+}, false);
