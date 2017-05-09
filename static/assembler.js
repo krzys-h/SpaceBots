@@ -17,6 +17,6 @@ var build = function(slot) {
 };
 
 socket.on('assembler built', function(data) {
-  got_report(data.object);
+  //got_report(data.object);
   console.log("Assembler has built " + JSON.stringify(data.object, null, '  '));
 });
