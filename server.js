@@ -24,6 +24,7 @@ nesh.start({
   historyFile: '.spacebots_history',
   historyMaxInputSize: 1024 * 1024,
   welcome: sty.b('SpaceBots')+' Copyright (C) 2013  Marek Rogalski\n' +
+    '          Copyright (C) 2017  Krzysztof Haładyn\n' +
     'This program comes with ABSOLUTELY NO WARRANTY; for details type "warranty()".\n' +
     'This is free software, and you are welcome to redistribute it under certain\n' +
     'conditions; type "copyright()" for details.'
