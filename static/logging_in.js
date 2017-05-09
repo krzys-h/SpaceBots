@@ -108,4 +108,8 @@ var log_in = function() {
   return send('log in', { player_id: localStorage.player_id });
 };
 
-var logged_in = connect().then(log_in);
+var logged_in = connect().then(function () {
+  if(localStorage.tutorial_finished == "true") {
+    return log_in();
+  }
+});

@@ -5,6 +5,9 @@
 
 localStorage.tutorial_finished = localStorage.tutorial_finished || "false";
 
+// TODO: The tutorial code is disabled for now because it's quite outdated
+localStorage.tutorial_finished = "true";
+
 // Notice that localStorage allows to store only a string value
 // so we'll need to use something like
 // localStorage.tutorial_finished == "true"
