@@ -53,30 +53,21 @@ logger.info('Listening on port ' + listener.port);
 var common = require('./static/common'),
 vectors = require('./static/vectors'),
 resources = require('./static/resources'),
-bp = require('./static/blueprints'),
-physics = require('./static/physics'),
+bp = require('./blueprints'),
 check = require('validator').check,
 sanitize = require('validator').sanitize;
 
-var objects = global.objects = physics.objects;
+var objects = global.objects = {};
 
 var reg = function(obj) {
   objects[obj.id] = obj;
   return obj;
 };
 
-var connect = function(a, b) {
-  var c = {
-    id: common.uid(),
-    a: a, b: b,
-    features: { rigid: true, relay: true },
-    mass: 5,
-    integrity: 10000
-  };
-  a.connections.push(c);
-  b.connections.push(c);
-  reg(c);
-  return c;
+var place = function(host, guest, pos) {
+  host.hub_slots[pos] = guest;
+  guest.parent = host;
+  return guest;
 };
 
 var asteroids = global.asteroids = [];
@@ -86,7 +77,6 @@ var make_asteroid = function() {
     id: common.uid(),
     features: {},
     composition: resources.make_resources(common.rnd_exp(5, 10), 14, 20),
-    connections: [],
     sprite: '/asteroid100.png',
     position: vectors.create(),
     velocity: vectors.create(),
@@ -100,30 +90,23 @@ for(var i = 0; i < 60; ++i) {
   asteroids.push(asteroid);
 }
 
-var create_and_add = function(a, features) {
-  var b = reg(bp.make(features, 10));
-  b.position = vectors.random2(50).add(a.position);
-  b.velocity = vectors.create(a.velocity);
-  connect(a, b);
-  return b;
-};
-
 var get_or_create_player = function(hash) {
   if(!(hash in objects)) {
 
-    var hull = reg(bp.make('manipulator', 10));
+    var hull = reg(bp.make('hub manipulator', 10));
     hull.position = vectors.random2(200);
     hull.velocity = vectors.random2(5);
+    hull.hub_slots = [null, null, null, null, null, null];
+    hull.sprite = '/hull.png';
 
-    var avatar = create_and_add(hull, 'avatar radio');
+    var avatar = place(hull, reg(bp.make('avatar radio', 10)), 0);
     avatar.radio_range = 1000;
 
-    var drive = create_and_add(hull, 'impulse_drive store battery');
+    var drive = place(hull, reg(bp.make('impulse_drive store battery', 10)), 1);
     drive.store_stored[0] = drive.store_capacity*0.75;
     drive.battery_energy = drive.battery_capacity;
-
-    create_and_add(hull, 'assembler refinery spectrometer');
-    create_and_add(hull, 'laboratory enriching_reactor burning_reactor');
+    place(hull, reg(bp.make('assembler refinery spectrometer', 10)), 2);
+    place(hull, reg(bp.make('laboratory enriching_reactor burning_reactor', 10)), 3);
 
     var player = reg({
       id: hash,
@@ -154,20 +137,12 @@ apply_secret_force = function(object) {
   for(var i = 0; i < 3; ++i) {
     var v = object.position[i];
     if(v < -2000) {
-      var cc = common.walk(object, 'rigid');
-      var delta = - v - 4000 - v;
-      for(var id in cc) {
-        if(cc[id].position) cc[id].position[i] += delta;
-        if(cc[id].velocity) cc[id].velocity[i] = -cc[id].velocity[i];
-      }
+      object.position[i] = - v - 4000;
+      object.velocity[i] = - object.velocity[i];
     }
     if(v > 2000) {
-      var cc = common.walk(object, 'rigid');
-      var delta = - v + 4000 - v;
-      for(var id in cc) {
-        if(cc[id].position) cc[id].position[i] += delta;
-        if(cc[id].velocity) cc[id].velocity[i] = -cc[id].velocity[i];
-      }
+      object.position[i] = - v + 4000;
+      object.velocity[i] = - object.velocity[i];
     }
   }
 };
@@ -193,30 +168,101 @@ attract = function() {
 
 attract();
 
-var physics_destroy = physics.destroy;
-var destroy = global.destroy = physics.destroy = function(object) {
+var damage_object = function(obj, dmg) {
+  logger.info('damaging ' + obj.id + ' with ' + dmg);
+  if(obj.integrity && dmg > obj.integrity) {
+    destroy(obj);
+  }
+};
 
+var damage_ship = function(root, dmg) {
+  logger.info('hit at ' + root.id + ' with ' + dmg);
+  var cc = common.walk(root);
+  var arr = common.dict_to_array(cc);
+  var total = 0;
+  var i;
+  for(i = 0; i < arr.length; ++i) {
+    total += resources.get_mass(arr[i]);
+  }
+  var here = Math.random() * total;
+  total = 0;
+  for(i = 0; i < arr.length; ++i) {
+    total += resources.get_mass(arr[i]);
+    if(total > here) break;
+  }
+  damage_object(arr[i], dmg);
+};
+
+var destroy = global.destroy = function(object) {
   logger.info(object.id + ' destroyed');
+  var pos = common.get_root(object).position;
+  var vel = common.get_root(object).velocity;
 
-  var cc = common.walk(object, 'relay');
+  var cc = common.walk(object);
   for(var k in cc) {
     var o = cc[k];
-    if(o.features.avatar) {
+    if('avatar' in o.features) {
       io.sockets.in(k).emit('destroyed', stub(object));
     }
   }
 
-  physics_destroy(object);
+  if(object.hub_slots) {
+    for(var i = 0; i < object.hub_slots.length; ++i) {
+      var orphan = object.hub_slots[i];
+      if(orphan) {
+        orphan.parent = undefined;
+        orphan.velocity = vectors.create(vel);
+        orphan.position = vectors.create(pos);
+        object.hub_slots[i] = undefined;
+      }
+    }
+  }
 
+  if(object.parent) {
+    var me = object.parent.hub_slots.indexOf(object);
+    object.parent.hub_slots[me] = undefined;
+    object.parent = undefined;
+  }
+
+  delete objects[object.id];
 };
 
-var physics_thrust = physics.thrust;
-var thrust = global.thrust = physics.thrust = function(object, momentum) {
+var apply_thrust_dmg = function(object, source, v, reduce_dmg) {
+  var mass = 0;
+  if(object.mass) {
+    mass += object.mass;
+  } else if(object.composition) {
+    mass += resources.get_mass(object.composition);
+  }
+  if(object.parent && object.parent !== source) {
+    mass += apply_thrust_dmg(object.parent, object, v, true);
+  }
+  if(object.hub_slots) {
+    for(var i = 0; i < object.hub_slots.length; ++i) {
+      if(object.hub_slots[i] && object.hub_slots[i] !== source) {
+        mass += apply_thrust_dmg(object.hub_slots[i], object, v, true);
+      }
+    }
+  }
+  var energy = mass * v;
+  if(reduce_dmg) {
+    energy /= 5;
+  }
+  if(energy > object.integrity) {
+    destroy(object);
+    mass = 0;
+  }
+  return mass;
+}
 
+var apply_thrust = function(object, direction, momentum, reduce_dmg) {
   logger.info('thrust on ' + object.id.slice(0,4) + ' : ' + momentum);
-
-  physics_thrust(object, momentum);
-
+  var root = common.get_root(object);
+  if(typeof root.velocity === 'undefined') return;
+  var mass = resources.get_connected_mass(object);
+  var dv = momentum / mass;
+  apply_thrust_dmg(object, object, dv, reduce_dmg);
+  root.velocity.add( direction.scaleTo(dv) );
 };
 
 var last_commands_db = {};
@@ -257,10 +303,18 @@ io.sockets.on('connection', function (socket) {
     logger.info(name + ' : ' + message);
   };
 
+  var fail = function(code, message) {
+    socket.emit('fail', {
+      code: code,
+      source: current_handler,
+      message: message
+    });
+  };
+
   log('connected');
 
   // true if limit exceeded, false if ok
-  var test_command_limit = function() {
+  var check_command_limit = function() {
     var now = (new Date).getTime() / 1000;
     var ten_before = last_commands.shift();
     last_commands.push(now);
@@ -298,7 +352,7 @@ io.sockets.on('connection', function (socket) {
 
     if(!('avatars' in player)) {
       player = undefined;
-      return callback('fail', { code: 3, message: 'Corrupted account - no avatar list.'});
+      return callback('fail', { code: 3, message: 'Currputed accound - no avatar list.'});
     }
     for(var k in player.avatars) {
       socket.join(k);
@@ -308,12 +362,54 @@ io.sockets.on('connection', function (socket) {
   });
 
   var find_target = function(command) {
+    if(typeof player === 'undefined') {
+      return fail(4, 'No player selected. You should first log in.');
+    }
+    if(typeof command === 'undefined') {
+      return fail(999, 'Command didn\'t have parameters defined.');
+    }
+    if(typeof command.target === 'undefined') {
+      return fail(5, 'Command didn\'t have `target` defined.');
+    }
+    if(!('' + command.target).match(/[0-9A-F]{32}/i)) {
+      return fail(6, 'Target hash is not a valid identifier (should' +
+                  ' match /[0-9A-F]{32}/i).');
+    }
+    // TODO: zasięg poleceń dla awatarów
+
+    var visited = {};
+    var queue = [];
+    for(var id in player.avatars) {
+      queue.push(id);
+    }
+    var count = 0;
+    while(queue.length) {
+      id = queue.pop();
+      if(id in visited) continue;
+      visited[id] = objects[id];
+      count += 1;
+      var current = objects[id];
+      if(typeof current === 'undefined') continue;
+      if(id == command.target) return current;
+      if(current.parent) {
+        queue.push(current.parent.id);
+      }
+      if(current.hub_slots) {
+        for(var i = 0; i < current.hub_slots.length; ++i) {
+          if(current.hub_slots[i]) {
+            queue.push(current.hub_slots[i].id);
+          }
+        }
+      }
+    }
+    return fail(7, 'Command target not found connected to any ' +
+                'avatar (searched ' + count+' objects).');
   };
 
   var check_feature = function(object, feature) {
-    if(!object.features[feature]) {
-      throw { code: 8, message: 'Specified component doesn\'t  have ' + feature + ' capabilities' };
-      return false;
+    if(typeof object.features[feature] === 'undefined') {
+      return fail(8, 'Specified component doesn\'t  have ' +
+                  feature + ' capabilities');
     }
     return true;
   };
@@ -325,69 +421,47 @@ io.sockets.on('connection', function (socket) {
     check(energy, "Required energy exceeds available in battery").max(battery.battery_energy);
   };
 
-  var on = function on(name, handler) {
-    socket.on(name, function on_handler(command, cb) {
+  var on = function(name, handler) {
+    socket.on(name, function(cmd) {
       log_in(name);
-      if(!player) {
-        return cb('fail', { code: 18, message: 'You have to log in first!' });
+      if(typeof player === 'undefined') {
+        return fail(18, 'You have to log in first!');
       }
-      if(test_command_limit()) {
-        return cb('fail', { code: 9, message: 'Exceeded limit of ' + last_commands.length + ' commands per second.' });
-      }
-      if(!command) {
-        return cb('fail', { code: 999, message: 'Command didn\'t have parameters defined.' });
-      }
-      if(!command.target) {
-        return cb('fail', { code: 5, message: 'Command didn\'t have `target` defined.' });
-      }
-      if(!('' + command.target).match(/[0-9A-F]{32}/i)) {
-        return cb('fail', { code: 6, message: 'Target hash is not a valid identifier (should match /[0-9A-F]{32}/i).' });
-      }
-
-      var target;
-      for(var id in player.avatars) {
-        var cc = common.walk(objects[id], 'relay');
-        if(target = cc[command.target]) break;
-      }
-
-      if(!target) {
-        return cb('fail', { code: 7, message: 'Command target not found connected to any avatar.' });
-      }
-
+      if(check_command_limit())
+        return fail(9, 'Exceeded limit of ' + last_commands.length + ' commands per second.');
+      var target = find_target(cmd);
+      if(!target) return;
       try {
-        if(cb) {
-          cb('success', handler(target, command));
-        } else {
-          handler(target, command);
-        }
+        handler(target, cmd);
       } catch(e) {
-        if(cb) {
-          cb('fail', { source: current_handler, message: e.message, stack: e.stack });
-        } else {
-          socket.emit('fail', { source: current_handler, message: e.message });
-        }
+        return fail(999, e.message);
       }
     });
   };
 
   on('sprite', function(target, data) {
     if('user_sprite' in target) {
-      throw { message: "Specified target already has 'user_sprite' defined." };
+      return fail(999, "Specified target already has 'user_sprite' defined.");
     }
     var spr = "" + data.user_sprite;
-    if(spr.length > 127) {
-      throw { message: "Requested sprite url has length " + data.length + " but should be no more than 127." };
+    if(spr > 127) {
+      return fail(999, "Requested sprite url has length " + data.length + " but should be no more than 127.");
     }
     target.user_sprite = spr;
-    return { id: target.id, user_sprite: spr };
+    socket.emit('sprite set', { id: target.id, user_sprite: spr });
   });
 
   on('report', function(target, data) {
     var report = {};
-    if(target.connections) report.connections = target.connections.map(stub);
-    if(target.a) report.a = stub(target.a);
-    if(target.b) report.b = stub(target.b);
-    if(target.manipulator_slot) report.manipulator_slot = stub(target.manipulator_slot);
+    if('parent' in target) {
+      report.parent = stub(target.parent);
+    }
+    if('hub_slots' in target) {
+      report.hub_slots = target.hub_slots.map(stub);
+    }
+    if('manipulator_slot' in target) {
+      report.manipulator_slot = stub(target.manipulator_slot);
+    }
     var copy = 'id features position velocity sprite user_sprite integrity radio_range impulse_drive_payload impulse_drive_impulse store_stored store_capacity battery_energy battery_capacity manipulator_range laboratory_slots laboratory_tech_level'.split(' ');
     copy.forEach(function(key) {
       report[key] = target[key];
@@ -395,25 +469,26 @@ io.sockets.on('connection', function (socket) {
     if(target.composition) {
       report.mass = resources.get_mass(target.composition);
     }
-    return report;
+    socket.emit('report', report);
   });
 
-  on('broadcast', function(target, data) {
-    check_feature(target, 'radio');
+  on('radio broadcast', function(target, data) {
+    if(!check_feature(target, 'radio')) return;
     var str = JSON.stringify(data.message);
     if(str.length > 140) {
-      throw { code: 1, message: 'JSON.stringify(message) should have at most 140 characters' };
+      return fail(1, 'JSON.stringify(message) should have at most 140 characters');
     }
-    socket.broadcast.emit('broadcast', { source: stub(target), message: data.message });
-    return "sent";
+    var root = common.get_root(target);
+    socket.broadcast.emit('broadcast', { source: stub(root), message: data.message });
   });
 
 
   var radio_copy_fields = 'id sprite user_sprite position velocity'.split(' ');
-  on('scan', function(target, data) {
-    check_feature(target, 'radio');
+  on('radio scan', function(target, data) {
+    if(!check_feature(target, 'radio')) return;
     var results = [];
-    var radio_position = target.position;
+    var now = (new Date).getTime();
+    var radio_position = common.get_position(target);
 
     for(var hash in objects) {
       var object = objects[hash];
@@ -425,7 +500,7 @@ io.sockets.on('connection', function (socket) {
         results.push(report);
       }
     }
-    return results;
+    socket.emit('radio result', results);
   });
 
 
@@ -450,7 +525,7 @@ io.sockets.on('connection', function (socket) {
       return fail(999, 'Grab position outside manipulator range.');
     }
 
-    var cc = common.walk(target);
+    var cc = common.walk(target, {}, true);
 
     var closest = undefined;
     var closest_dist = 999999;
@@ -484,15 +559,25 @@ io.sockets.on('connection', function (socket) {
       return;
     if(typeof target.manipulator_slot === 'undefined')
       return fail(999, 'Manipulator empty - nothing to be attached.');
-    if(typeof data.hub === 'undefined')
-      return fail(999, 'You must define hub to attach to.');
-    var hub = common.get(data.hub);
+    var hub = find_co_component(target, data.hub, 'hub');
+    if(typeof data.hub_slot !== 'number')
+      return fail(999, 'hub slot should be a number.');
+    var idx = Math.round(data.skeleton_slot);
+    if(idx < 0)
+      return fail(999, 'Specified skeleton doesn\'t have negative slots.');
+    if(idx >= skeleton.skeleton_slots.length)
+      return fail(999, 'Specified skeleton doesn\'t have that many slots.');
+    if(skeleton.skeleton_slots[idx])
+      return fail(999, 'Skeleton '+data.skeleton+' slot '+idx+' occupied by '+skeleton.skeleton_slots[idx].id+'.');
 
     var o = target.manipulator_slot;
-    connect(hub, o);
+    skeleton.skeleton_slots[idx] = o;
+    o.parent = skeleton;
+    delete target.manipulator_slot.position;
+    delete target.manipulator_slot.velocity;
     delete target.manipulator_slot.grabbed_by;
     delete target.manipulator_slot;
-    socket.emit('manipulator attached', { manipulator: { id: target.id }, hub: { id: hub.id }, object: { id: o.id } });
+    socket.emit('manipulator attached', { manipulator: { id: target.id }, skeleton: { id: skeleton.id }, slot: idx, object: { id: o.id } });
   });
 
   on('manipulator detach', function(target, data) {
@@ -515,8 +600,8 @@ io.sockets.on('connection', function (socket) {
     skeleton.skeleton_slots[idx] = null;
     delete target.manipulator_slot.parent;
     target.manipulator_slot.grabbed_by = target;
-    target.manipulator_slot.position = vectors.create(target.position);
-    target.manipulator_slot.velocity = vectors.create(target.velocity);
+    target.manipulator_slot.position = vectors.create(common.get_root(target).position);
+    target.manipulator_slot.velocity = vectors.create(common.get_root(target).velocity);
     socket.emit('manipulator detached', { manipulator: stub(target), skeleton: stub(skeleton), slot: idx, object: stub(target.manipulator_slot) });
   });
 
@@ -534,7 +619,7 @@ io.sockets.on('connection', function (socket) {
   });
 
   var find_co_component = function(source, id, feature) {
-    var cc = common.walk(source, 'relay');
+    var cc = common.walk(source);
     var name = feature ? feature.capitalize() : "Object";
     check(id, name + ' id (' + id + ') doesn\'t match /[0-9A-F]{32}/i').is(/[0-9A-F]{32}/i);
     check(cc[id], name + ' ' + id + ' is not reachable from ' + source.id).notNull();
@@ -557,18 +642,17 @@ io.sockets.on('connection', function (socket) {
     battery_check(energy_source, data.energy);
     var energy = Number(data.energy);
 
-    var direction = vectors.create(data.direction).scaleTo(energy);
+    var direction = vectors.create(data.direction);
     var object = target.manipulator_slot;
 
-    thrust(object, direction);
-    thrust(target, direction.neg());
-
+    apply_thrust(object, direction, energy);
+    apply_thrust(target, direction.neg(), energy);
     energy_source.battery_energy -= energy;
 
   });
 
   on('impulse_drive push', function(target, cmd) {
-    check_feature(target, 'impulse_drive');
+    if(!check_feature(target, 'impulse_drive')) return;
 
     var energy_source = find_co_component(target, cmd.energy_source, 'battery');
     if(typeof energy_source === 'undefined') return;
@@ -576,22 +660,23 @@ io.sockets.on('connection', function (socket) {
     if(typeof matter_store === 'undefined') return;
 
     if(!resources.lte(cmd.composition, matter_store.store_stored)) {
-      throw { code: 11, message: 'Ordered to grab more materials than available in store.' };
+      return fail(11, 'Ordered to grab more materials than available in store.');
     }
     var reaction_mass = resources.get_mass(cmd.composition);
     if(reaction_mass > target.impulse_drive_payload) {
-      throw { code: 12, message: 'Ordered payload exceeds drive capabilities.' };
+      return fail(12, 'Ordered payload exceeds drive capabilities.');
     }
     if(cmd.impulse > target.impulse_drive_impulse) {
-      throw { code: 13, message: 'Ordered impulse exceeds drive capabilities.' };
+      return fail(13, 'Ordered impulse exceeds drive capabilities.');
     }
     if(cmd.impulse <= 0) {
-      throw { code: 999, message: 'Impulse must be greather than 0.' };
+      return fail(999, 'Impulse must be greather than 0.');
     }
     var energy = reaction_mass * cmd.impulse;
     battery_check(energy_source, energy);
 
-    var d = target.position.dist(cmd.destination);
+    var root = common.get_root(target);
+    var d = root.position.dist(cmd.destination);
     var time = d / cmd.impulse;
 
     setTimeout(function() {
@@ -636,20 +721,18 @@ io.sockets.on('connection', function (socket) {
       // selection of hit location
       var arr = common.dict_to_array(cc);
       var i = Math.floor(Math.random() * arr.length);
-      thrust(arr[i], direction.neg());
+      apply_thrust(arr[i], direction.neg(), energy, false);
     }, time * 1000);
-    
 
-    var direction = vectors.create(target.position).
+
+    var direction = vectors.create(root.position).
       subtract(cmd.destination).
-      scaleTo(energy);
+      normalize();
 
-    thrust(target, direction);
+    apply_thrust(target, direction, energy, true);
 
     resources.subtract(matter_store.store_stored, cmd.composition);
     energy_source.battery_energy -= energy;
-
-    return;
 
   });
 

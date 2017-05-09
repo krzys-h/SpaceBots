@@ -1,35 +1,30 @@
 (function(e){
 
-	var resources = require('./resources'),
-      common    = require('./common');
+	var resources = require('./static/resources'),
+		common = require('./static/common');
 
 	var chances = {
+		'assembler': 100,
 		'avatar': 5,
-		'laser': 100,
-
-		'radio': 100,
-		'spectrometer': 100,
-
+		'battery': 100,
 		'burning_reactor': 100,
+		'impulse_drive': 100,
 		'enriching_reactor': 100,
 		'fission_reactor': 100,
 		'fusion_reactor': 100,
-
-		'store': 100,
-		'battery': 100,
-
 		'laboratory': 100,
-
-		'assembler': 100,
-		'refinery': 100,
-
+		'laser': 100,
 		'manipulator': 100,
-		'impulse_drive': 100
+		'radio': 100,
+		'refinery': 100,
+		'hub': 20,
+		'spectrometer': 100,
+		'store': 100
 	};
 
   var sprites = {
-    //'assembler': '/assembler101.png',
-    //'avatar': '/avatar28.png',
+    'assembler': '/assembler101.png',
+    'avatar': '/avatar28.png',
     'battery': '/battery37.png'
   };
 
@@ -97,7 +92,7 @@
 			var nf = count_features(b);
 			return nf * nf * 25 / Math.max(1, v);
 		},
-		integrity: function(b, v) { return (v+1) * 10000; }
+		integrity: function(b, v) { return (v+1) * 1000; }
 	};
 
 	var tradeoffs = {
@@ -115,6 +110,11 @@
 			//	return Math.round(Math.pow(v, 0.4));
 			//},
 			//sensitivity: function(b, v) { return Math.sqrt(v) / 2; }
+		},
+		hub: {
+			slots: function(b, v) {
+				return new Array(Math.round(Math.pow(v, 0.5)));
+			}
 		},
 		manipulator: {
 			range: function(b, v) { return v * 10; }
@@ -294,7 +294,6 @@
 		var kl = Object.keys(blueprint).length - 2;
 		object.features = {};
 		object.id = common.uid();
-    object.connections = [];
 		object.composition = estimate_materials(blueprint);
 
 		for(var feature in blueprint) {

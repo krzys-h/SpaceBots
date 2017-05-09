@@ -18,15 +18,19 @@ socket.on('manipulator released', function(data) {
   delete objects[data.id].manipulator_slot;
 });
 
-var attach = function(hub) {
+var attach = function(hub, slot) {
   hub = common.get(hub);
-  socket.emit('manipulator attach', {target: manipulator.id, hub: hub.id});
+  socket.emit('manipulator attach', {target: manipulator.id, hub: hub.id, hub_slot: slot});
 };
 
 socket.on('manipulator attached', function(data) {
   var s = common.get(data.hub.id);
   var o = common.get(data.object.id);
   var m = common.get(data.manipulator.id);
+  s.hub_slots[data.slot] = o;
+  o.parent = s;
+  delete o.position;
+  delete o.velocity;
   delete o.grabbed_by;
   delete m.manipulator_slot;
   socket.emit('report', { target: o.id });
@@ -45,9 +49,9 @@ socket.on('manipulator detached', function(data) {
   m.manipulator_slot = o;
   s.hub_slots[idx] = null;
   delete o.parent;
-  o.grabbed_by = m;
-  o.position = vectors.create(m.position);
-  o.velocity = vectors.create(m.velocity);
+  o.grabbed_by = target;
+  o.position = vectors.create(common.get_root(target).position);
+  o.velocity = vectors.create(common.get_root(target).velocity);
 });
 
 var repulse = function(x, y, z, power) {
