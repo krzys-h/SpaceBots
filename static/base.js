@@ -139,6 +139,29 @@ var run_script = function(data, title) {
 
 // Logging function
 
+// On-screen console
+
+(function() {
+  var make_logger = function(style, command) {
+    return function() {
+      var c = document.getElementById('console');
+      var m = document.createElement('div');
+      if(style) m.classList.add(style);
+      var t = Array.prototype.join.call(arguments, ' ');
+      m.innerText = t;
+      c.appendChild(m);
+      setTimeout(function() {
+        m.fadeOut();
+      }, 3000 + 100 * t.length);
+      command.apply(this, arguments);
+    }
+  };
+  console.log = make_logger(null, console.log);
+  console.info = make_logger('info', console.info);
+  console.warn = make_logger('warn', console.warn);
+  console.error = make_logger('error', console.error);
+})();
+
 var log = console.log.bind(console);
 var error = console.log.bind(error);
 var info = console.log.bind(info);
