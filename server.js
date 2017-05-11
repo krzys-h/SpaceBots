@@ -425,9 +425,9 @@ io.sockets.on('connection', function (socket) {
 				}
 			} catch(e) {
 				if(cb) {
-					cb('fail', { source: current_handler, message: e.message, stack: e.stack });
+					cb('fail', { source: current_handler, message: e.message, stack: e.stack ? e.stack.split("\n") : undefined });
 				} else {
-					socket.emit('fail', { source: current_handler, message: e.message });
+					socket.emit('fail', { source: current_handler, message: e.message, stack: e.stack ? e.stack.split("\n") : undefined });
 				}
 			}
 		});
@@ -629,7 +629,6 @@ io.sockets.on('connection', function (socket) {
 		if(data.direction.length != 3)
 			throw { message: 'Repulse direction should have length 3.' };
 		var energy_source = find_co_component(target, data.energy_source, 'battery');
-		if(typeof energy_source === 'undefined') return;
 
 		battery_check(energy_source, data.energy);
 		var energy = Number(data.energy);
@@ -647,9 +646,7 @@ io.sockets.on('connection', function (socket) {
 		check_feature(target, 'impulse_drive');
 
 		var energy_source = find_co_component(target, cmd.energy_source, 'battery');
-		if(typeof energy_source === 'undefined') return;
 		var matter_store = find_co_component(target, cmd.matter_source, 'store');
-		if(typeof matter_store === 'undefined') return;
 
 		if(!resources.lte(cmd.composition, matter_store.store_stored)) {
 			throw { code: 11, message: 'Ordered to grab more materials than available in store.' };
@@ -731,9 +728,7 @@ io.sockets.on('connection', function (socket) {
 	on('refinery refine', function(target, data) {
 		check_feature(target, 'refinery');
 		var store = find_co_component(target, data.store, 'store');
-		if(typeof store === 'undefined') return;
 		var material = find_co_component(target, data.material);
-		if(typeof material === 'undefined') return;
 
 		var stored = resources.get_mass(store.store_stored);
 		var space_left = store.store_capacity - stored;
@@ -768,9 +763,7 @@ io.sockets.on('connection', function (socket) {
 	on('store move', function(target, data) {
 		check_feature(target, 'store');
 		var store = find_co_component(target, data.store, 'store');
-		if(typeof store === 'undefined') return;
 		var composition = data.composition;
-		if(typeof composition === 'undefined') return;
 
 		if(!resources.lte(composition, store.store_stored)) {
 			throw { message: 'Not enough resources in store.' };
@@ -794,7 +787,6 @@ io.sockets.on('connection', function (socket) {
 	on('battery move', function(target, data) {
 		check_feature(target, 'battery');
 		var battery = find_co_component(target, data.battery, 'battery');
-		if(typeof battery === 'undefined') return;
 		battery_check(battery, data.energy);
 		var energy = data.energy;
 
@@ -809,7 +801,6 @@ io.sockets.on('connection', function (socket) {
 		return { id: target.id, moved: energy };
 	});
 
-
 	on('laboratory invent', function(target, json) {
 		check_feature(target, 'laboratory');
 		var laboratory = target;
@@ -819,7 +810,6 @@ io.sockets.on('connection', function (socket) {
 		var slot = sanitize(json.slot).toInt();
 		check(laboratory.laboratory_slots[slot], "Laboratory slot taken").isNull();
 		var battery = find_co_component(laboratory, json.battery, 'battery');
-		if(typeof battery === 'undefined') return;
 		battery_check(battery, json.energy);
 		var energy = Number(json.energy);
 		battery.battery_energy -= energy;

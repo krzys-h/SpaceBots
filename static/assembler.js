@@ -13,7 +13,7 @@ var build = function(slot) {
 		slot: slot,
 		store: store.id
 	}).then(function(data) {
-		console.log("Assembler has built " + JSON.stringify(data.object, null, '	'));
+		console.log('Assembler has built ' + JSON.stringify(data.object, null, '	'));
 		return report2object(data.object);
 	});
 };

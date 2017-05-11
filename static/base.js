@@ -139,7 +139,7 @@ var run_script = function(data, title) {
 
 // On-screen console
 
-(function() {
+/*(function() {
 	var make_logger = function(style, command) {
 		return function() {
 			var c = document.getElementById('console');
@@ -158,7 +158,7 @@ var run_script = function(data, title) {
 	console.info = make_logger('info', console.info);
 	console.warn = make_logger('warn', console.warn);
 	console.error = make_logger('error', console.error);
-})();
+})();*/
 
 
 // Extend Element with utility functions...

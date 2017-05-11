@@ -553,6 +553,12 @@ controls.assembler = function(elem, object) {
 	elem.appendChild(template.cloneNode(true));
 };
 
+controls.refinery = function(elem, object) {
+	var template = document.getElementById("refinery_controls").content;
+	template.querySelectorAll('.set_id').text(document.querySelector('.focused').id.substr(0, 4));
+	elem.appendChild(template.cloneNode(true));
+};
+
 var element_in_document = function( element ) {
 	if (element === document) {
 		return true;
