@@ -58,7 +58,7 @@ var do_impulse = function(x,y,z,mass,speed) {
 
 	// Last step of our impulse is to send command to the drive.
 
-	socket.emit('impulse_drive push', {
+	return send('impulse_drive push', {
 		target: impulse_drive.id,
 		energy_source: battery.id,
 		matter_source: store.id,
@@ -117,36 +117,14 @@ var speed_step = function(desired_v) {
 	var target = relative_to_absolute(direction);
 
 	if(achievable) {
-		do_impulse(
+		return do_impulse(
 			target[0],
 			target[1],
 			target[2],
 			change_v_l / delta_v_l
 		);
-		return false;
 	} else {
-		do_impulse.apply(undefined, target);
-		return true;
-	}
-};
-
-var stop = function() {
-	if(radio_scanner.has_callback(navigate_tick)) {
-
-		// It callback is already running, let's abort stopping by
-		// clearing it.
-
-		radio_scanner.remove_callback(navigate_tick);
-		console.log("Maneuver aborted!");
-
-	} else {
-
-		// The callback isn't set. Let's set it.
-
-		destination = { velocity: vectors.zero };
-		radio_scanner.add_callback(navigate_tick);
-		console.log("Stopping initiated");
-
+		return do_impulse.apply(undefined, target);
 	}
 };
 
@@ -160,7 +138,8 @@ var get_position_now = function get_position_now(x) {
 };
 
 var destination = null;
-var destination_callback = null;
+var navigation_cancelled = null;
+var navigation_succeeded = null;
 
 var navigate_tick = function() {
 	// Now let's calculate how fast we are moving relative to our
@@ -191,33 +170,50 @@ var navigate_tick = function() {
 	var my_velocity = common.get_root(impulse_drive).velocity;
 	var velocity_diff = my_velocity.dist(target_velocity);
 	if(velocity_diff > 0.5) {
-		speed_step(target_velocity);
+		speed_step(target_velocity).catch(function(error) {
+			console.error("Error during navigation", error);
+			radio_scanner.remove_callback(navigate_tick);
+			navigation_cancelled();
+			destination = navigation_cancelled = navigation_succeeded = null;
+		});
 	}
 
-	if((distance > 10) || (velocity_diff > 0.5)) {
-		radio_scanner.add_callback(navigate_tick);
-	} else {
+	if((distance < 10) && (velocity_diff < 0.5)) {
 		radio_scanner.remove_callback(navigate_tick);
-		var c = destination_callback;
-		if(c) {
-			destination_callback = null;
-			c();
-		}
 		console.log("Destination reached.");
+		radio_scanner.remove_callback(navigate_tick);
+		navigation_succeeded();
+		destination = navigation_cancelled = navigation_succeeded = null;
 	}
 
 };
 
-var navigate = function(dest, cb) {
-	destination = common.get(dest);
-	destination_callback = cb;
-
+var toggle_maneuver = function toggle_maneuver() {
+	
 	if(radio_scanner.has_callback(navigate_tick)) {
-		radio_scanner.remove_callback(navigate_tick);
 		console.log("Maneuver aborted!");
+		radio_scanner.remove_callback(navigate_tick);
+		navigation_cancelled();
+		destination = navigation_cancelled = navigation_succeeded = null;
+		return null;
 	} else {
-		radio_scanner.add_callback(navigate_tick);
-		console.log("Maneuver initiated");
+		return new Promise(function(resolve, reject) {
+			console.log("Maneuver initiated");
+			radio_scanner.add_callback(navigate_tick);
+			navigation_cancelled = reject;
+			navigation_succeeded = resolve;
+		});
 	}
+	
+};
 
+
+var stop = function stop() {
+	destination = { velocity: vectors.zero };
+	return toggle_maneuver();
+};
+
+var navigate = function navigate(dest) {
+	destination = common.get(dest);
+	return toggle_maneuver();
 };

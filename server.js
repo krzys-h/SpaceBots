@@ -23,8 +23,8 @@ nesh.start({
 	ignoreUndefined: true,
 	historyFile: '.spacebots_history',
 	historyMaxInputSize: 1024 * 1024,
-	welcome: sty.b('SpaceBots')+' Copyright (C) 2013	Marek Rogalski\n' +
-		'					 Copyright (C) 2017	 Krzysztof Haładyn\n' +
+	welcome: sty.b('SpaceBots')+' Copyright (C) 2013  Marek Rogalski\n' +
+		'          Copyright (C) 2017  Krzysztof Haładyn\n' +
 		'This program comes with ABSOLUTELY NO WARRANTY; for details type "warranty()".\n' +
 		'This is free software, and you are welcome to redistribute it under certain\n' +
 		'conditions; type "copyright()" for details.'
@@ -303,18 +303,10 @@ io.sockets.on('connection', function (socket) {
 		logger.info(name + ' : ' + message);
 	};
 
-	var fail = function(code, message) {
-		socket.emit('fail', {
-			code: code,
-			source: current_handler,
-			message: message
-		});
-	};
-
 	log('connected');
 
 	// true if limit exceeded, false if ok
-	var check_command_limit = function() {
+	var test_command_limit = function() {
 		var now = (new Date).getTime() / 1000;
 		var ten_before = last_commands.shift();
 		last_commands.push(now);
@@ -362,20 +354,15 @@ io.sockets.on('connection', function (socket) {
 	});
 
 	var find_target = function(command) {
-		if(typeof player === 'undefined') {
-			return fail(4, 'No player selected. You should first log in.');
+		if(!command) {
+			throw { code: 999, message: 'Command didn\'t have parameters defined.' };
 		}
-		if(typeof command === 'undefined') {
-			return fail(999, 'Command didn\'t have parameters defined.');
-		}
-		if(typeof command.target === 'undefined') {
-			return fail(5, 'Command didn\'t have `target` defined.');
+		if(!command.target) {
+			throw { code: 5, message: 'Command didn\'t have `target` defined.' };
 		}
 		if(!('' + command.target).match(/[0-9A-F]{32}/i)) {
-			return fail(6, 'Target hash is not a valid identifier (should' +
-									' match /[0-9A-F]{32}/i).');
+			throw { code: 6, message: 'Target hash is not a valid identifier (should match /[0-9A-F]{32}/i).' };
 		}
-		// TODO: zasięg poleceń dla awatarów
 
 		var visited = {};
 		var queue = [];
@@ -402,16 +389,13 @@ io.sockets.on('connection', function (socket) {
 				}
 			}
 		}
-		return fail(7, 'Command target not found connected to any ' +
-								'avatar (searched ' + count+' objects).');
+		throw { code: 7, message: 'Command target not found connected to any avatar (searched ' + count + ' objects).' };
 	};
 
 	var check_feature = function(object, feature) {
-		if(typeof object.features[feature] === 'undefined') {
-			return fail(8, 'Specified component doesn\'t	have ' +
-									feature + ' capabilities');
+		if(!object.features[feature]) {
+			throw { code: 8, message: 'Specified component doesn\'t	 have ' + feature + ' capabilities' };
 		}
-		return true;
 	};
 
 	var battery_check = function(battery, energy) {
@@ -421,34 +405,44 @@ io.sockets.on('connection', function (socket) {
 		check(energy, "Required energy exceeds available in battery").max(battery.battery_energy);
 	};
 
-	var on = function(name, handler) {
-		socket.on(name, function(cmd) {
+	var on = function on(name, handler) {
+		socket.on(name, function on_handler(command, cb) {
 			log_in(name);
-			if(typeof player === 'undefined') {
-				return fail(18, 'You have to log in first!');
+			if(!player) {
+				return cb('fail', { code: 18, message: 'You have to log in first!' });
 			}
-			if(check_command_limit())
-				return fail(9, 'Exceeded limit of ' + last_commands.length + ' commands per second.');
-			var target = find_target(cmd);
-			if(!target) return;
+			if(test_command_limit()) {
+				return cb('fail', { code: 9, message: 'Exceeded limit of ' + last_commands.length + ' commands per second.' });
+			}
+
 			try {
-				handler(target, cmd);
+				var target = find_target(command);
+
+				if(cb) {
+					cb('success', handler(target, command));
+				} else {
+					handler(target, command);
+				}
 			} catch(e) {
-				return fail(999, e.message);
+				if(cb) {
+					cb('fail', { source: current_handler, message: e.message, stack: e.stack });
+				} else {
+					socket.emit('fail', { source: current_handler, message: e.message });
+				}
 			}
 		});
 	};
 
 	on('sprite', function(target, data) {
 		if('user_sprite' in target) {
-			return fail(999, "Specified target already has 'user_sprite' defined.");
+			throw { message: "Specified target already has 'user_sprite' defined." };
 		}
 		var spr = "" + data.user_sprite;
-		if(spr > 127) {
-			return fail(999, "Requested sprite url has length " + data.length + " but should be no more than 127.");
+		if(spr.length > 127) {
+			throw { message: "Requested sprite url has length " + data.length + " but should be no more than 127." };
 		}
 		target.user_sprite = spr;
-		socket.emit('sprite set', { id: target.id, user_sprite: spr });
+		return { id: target.id, user_sprite: spr };
 	});
 
 	on('report', function(target, data) {
@@ -469,25 +463,24 @@ io.sockets.on('connection', function (socket) {
 		if(target.composition) {
 			report.mass = resources.get_mass(target.composition);
 		}
-		socket.emit('report', report);
+		return report;
 	});
 
 	on('radio broadcast', function(target, data) {
-		if(!check_feature(target, 'radio')) return;
+		check_feature(target, 'radio');
 		var str = JSON.stringify(data.message);
 		if(str.length > 140) {
-			return fail(1, 'JSON.stringify(message) should have at most 140 characters');
+			throw { code: 1, message: 'JSON.stringify(message) should have at most 140 characters' };
 		}
-		var root = common.get_root(target);
-		socket.broadcast.emit('broadcast', { source: stub(root), message: data.message });
+		socket.broadcast.emit('broadcast', { source: stub(common.get_root(target)), message: data.message });
+		return "sent";
 	});
 
 
 	var radio_copy_fields = 'id sprite user_sprite position velocity'.split(' ');
 	on('radio scan', function(target, data) {
-		if(!check_feature(target, 'radio')) return;
+		check_feature(target, 'radio');
 		var results = [];
-		var now = (new Date).getTime();
 		var radio_position = common.get_position(target);
 
 		for(var hash in objects) {
@@ -500,7 +493,7 @@ io.sockets.on('connection', function (socket) {
 				results.push(report);
 			}
 		}
-		socket.emit('radio result', results);
+		return results;
 	});
 
 
@@ -652,7 +645,7 @@ io.sockets.on('connection', function (socket) {
 	});
 
 	on('impulse_drive push', function(target, cmd) {
-		if(!check_feature(target, 'impulse_drive')) return;
+		check_feature(target, 'impulse_drive');
 
 		var energy_source = find_co_component(target, cmd.energy_source, 'battery');
 		if(typeof energy_source === 'undefined') return;
@@ -660,17 +653,17 @@ io.sockets.on('connection', function (socket) {
 		if(typeof matter_store === 'undefined') return;
 
 		if(!resources.lte(cmd.composition, matter_store.store_stored)) {
-			return fail(11, 'Ordered to grab more materials than available in store.');
+			throw { code: 11, message: 'Ordered to grab more materials than available in store.' };
 		}
 		var reaction_mass = resources.get_mass(cmd.composition);
 		if(reaction_mass > target.impulse_drive_payload) {
-			return fail(12, 'Ordered payload exceeds drive capabilities.');
+			throw { code: 12, message: 'Ordered payload exceeds drive capabilities.' };
 		}
 		if(cmd.impulse > target.impulse_drive_impulse) {
-			return fail(13, 'Ordered impulse exceeds drive capabilities.');
+			throw { code: 13, message: 'Ordered impulse exceeds drive capabilities.' };
 		}
 		if(cmd.impulse <= 0) {
-			return fail(999, 'Impulse must be greather than 0.');
+			throw { code: 999, message: 'Impulse must be greather than 0.' };
 		}
 		var energy = reaction_mass * cmd.impulse;
 		battery_check(energy_source, energy);
