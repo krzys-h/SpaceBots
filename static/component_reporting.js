@@ -83,6 +83,12 @@ var reporter = {
 		if(reporter.queue.indexOf(id) < 0) {
 			reporter.queue.push(id);
 		}
+	},
+	remove: function reporter_remove(id) {
+		var idx = reporter.queue.indexOf(id);
+		if(idx >= 0) {
+			reporter.queue.splice(idx, 1);
+		}
 	}
 };
 

@@ -137,8 +137,6 @@ var run_script = function(data, title) {
 // TODO: clean this up
 
 
-// Logging function
-
 // On-screen console
 
 (function() {
@@ -161,11 +159,6 @@ var run_script = function(data, title) {
 	console.warn = make_logger('warn', console.warn);
 	console.error = make_logger('error', console.error);
 })();
-
-var log = console.log.bind(console);
-var error = console.log.bind(error);
-var info = console.log.bind(info);
-var warn = console.log.bind(warn);
 
 
 // Extend Element with utility functions...

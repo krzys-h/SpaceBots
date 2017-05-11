@@ -71,7 +71,7 @@ var radio_scanner = {
 
 var messages = {};
 var broadcast = function(msg) {
-	socket.emit('radio broadcast', { target: avatar.id, message: msg });
+	return send('radio broadcast', { target: avatar.id, message: msg });
 };
 
 socket.on('broadcast', function(data) {

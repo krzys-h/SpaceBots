@@ -29,6 +29,9 @@ var send = function(command, argument) {
 			else
 				reject(reply);
 		});
+	}).catch(function(error) {
+		console.error('Error while handling \''+command+'\': ', error);
+		throw error;
 	});
 };
 

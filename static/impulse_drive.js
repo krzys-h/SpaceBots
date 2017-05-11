@@ -142,50 +142,56 @@ var navigation_cancelled = null;
 var navigation_succeeded = null;
 
 var navigate_tick = function() {
-	// Now let's calculate how fast we are moving relative to our
-	// destination and the direction we should move towards...
-	var engine_pos = get_position_now(impulse_drive);
-	var target_pos;
-	if('position' in destination) {
-		target_pos = get_position_now(destination);
-	}
-
-	var target_velocity = vectors.create();
-	var distance = 0;
-
-	if(target_pos) {
-		var diff = vectors.create(target_pos).subtract(engine_pos);
-		distance = diff.len();
-		target_velocity.add(diff, 0.1);
-	}
-
-	if('velocity' in destination) {
-		target_velocity.add( destination.velocity );
-
-		if(distance < 10) {
-			target_velocity = destination.velocity;
+	try {
+		// Now let's calculate how fast we are moving relative to our
+		// destination and the direction we should move towards...
+		var engine_pos = get_position_now(impulse_drive);
+		var target_pos;
+		if('position' in destination) {
+			target_pos = get_position_now(destination);
 		}
-	}
 
-	var my_velocity = common.get_root(impulse_drive).velocity;
-	var velocity_diff = my_velocity.dist(target_velocity);
-	if(velocity_diff > 0.5) {
-		speed_step(target_velocity).catch(function(error) {
-			console.error("Error during navigation", error);
+		var target_velocity = vectors.create();
+		var distance = 0;
+
+		if(target_pos) {
+			var diff = vectors.create(target_pos).subtract(engine_pos);
+			distance = diff.len();
+			target_velocity.add(diff, 0.1);
+		}
+
+		if('velocity' in destination) {
+			target_velocity.add( destination.velocity );
+
+			if(distance < 10) {
+				target_velocity = destination.velocity;
+			}
+		}
+
+		var my_velocity = common.get_root(impulse_drive).velocity;
+		var velocity_diff = my_velocity.dist(target_velocity);
+		if(velocity_diff > 0.5) {
+			speed_step(target_velocity).catch(function(error) {
+				console.error("Error during navigation", error);
+				radio_scanner.remove_callback(navigate_tick);
+				navigation_cancelled();
+				destination = navigation_cancelled = navigation_succeeded = null;
+			});
+		}
+
+		if((distance < 10) && (velocity_diff < 0.5)) {
 			radio_scanner.remove_callback(navigate_tick);
-			navigation_cancelled();
+			console.log("Destination reached.");
+			radio_scanner.remove_callback(navigate_tick);
+			navigation_succeeded();
 			destination = navigation_cancelled = navigation_succeeded = null;
-		});
-	}
-
-	if((distance < 10) && (velocity_diff < 0.5)) {
+		}
+	} catch(error) {
+		console.error("Error during navigation", error);
 		radio_scanner.remove_callback(navigate_tick);
-		console.log("Destination reached.");
-		radio_scanner.remove_callback(navigate_tick);
-		navigation_succeeded();
+		navigation_cancelled();
 		destination = navigation_cancelled = navigation_succeeded = null;
 	}
-
 };
 
 var toggle_maneuver = function toggle_maneuver() {

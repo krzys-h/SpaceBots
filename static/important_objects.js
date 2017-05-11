@@ -90,7 +90,7 @@ var report2object = function report2object(obj) {
 	// about these held objects, we should mark them in our objects
 	// set:
 
-	if(obj.manipulator_slot) obj.manipulator_slot = stub2object(manipulator_slot);
+	if(obj.manipulator_slot) obj.manipulator_slot = stub2object(obj.manipulator_slot);
 
 	return obj;
 
@@ -115,7 +115,8 @@ var report2object = function report2object(obj) {
 // that is under our control.
 
 var stub2object = function(stub) {
-	reporter.add(stub.id);
+	if(stub.id in common.walk(avatar))
+		reporter.add(stub.id);
 	return objects[stub.id] || (objects[stub.id] = stub);
 };
 

@@ -355,7 +355,7 @@ io.sockets.on('connection', function (socket) {
 
 	var find_target = function(command) {
 		if(!command) {
-			throw { code: 999, message: 'Command didn\'t have parameters defined.' };
+			throw { message: 'Command didn\'t have parameters defined.' };
 		}
 		if(!command.target) {
 			throw { code: 5, message: 'Command didn\'t have `target` defined.' };
@@ -473,7 +473,6 @@ io.sockets.on('connection', function (socket) {
 			throw { code: 1, message: 'JSON.stringify(message) should have at most 140 characters' };
 		}
 		socket.broadcast.emit('broadcast', { source: stub(common.get_root(target)), message: data.message });
-		return "sent";
 	});
 
 
@@ -498,7 +497,7 @@ io.sockets.on('connection', function (socket) {
 
 
 	on('manipulator grab', function(target, data) {
-		if(!check_feature(target, 'manipulator')) return;
+		check_feature(target, 'manipulator');
 
 		if(target.manipulator_slot) {
 			delete target.manipulator_slot.grabbed_by;
@@ -515,7 +514,7 @@ io.sockets.on('connection', function (socket) {
 		var left_range = total_range - grab_position.dist(manipulator_position);
 
 		if(left_range < 0) {
-			return fail(999, 'Grab position outside manipulator range.');
+			throw { message: 'Grab position outside manipulator range.' };
 		}
 
 		var cc = common.walk(target, {}, true);
@@ -535,33 +534,46 @@ io.sockets.on('connection', function (socket) {
 		}
 
 		if(closest_dist > left_range) {
-			return fail(999, 'No valid object found around grab position.');
+			throw { message: 'No valid object found around grab position.' };
 		}
 
 		closest.grabbed_by = target;
 		target.manipulator_slot = closest;
 
-		socket.emit('manipulator grabbed', {
+		return {
 			id: target.id,
 			manipulator_slot: { id: closest.id }
-		});
+		};
+	});
+
+	on('manipulator release', function(target, data) {
+		check_feature(target, 'manipulator');
+
+		if(!target.manipulator_slot) {
+			throw { message: 'Manipulator empty.' };
+		}
+
+		delete target.manipulator_slot.grabbed_by;
+		delete target.manipulator_slot;
+
+		return { id: target.id };
 	});
 
 	on('manipulator attach', function(target, data) {
-		if(!check_feature(target, 'manipulator'))
-			return;
+		check_feature(target, 'manipulator');
+
 		if(typeof target.manipulator_slot === 'undefined')
-			return fail(999, 'Manipulator empty - nothing to be attached.');
+			throw { message: 'Manipulator empty - nothing to be attached.' };
 		var hub = find_co_component(target, data.hub, 'hub');
 		if(typeof data.hub_slot !== 'number')
-			return fail(999, 'hub slot should be a number.');
+			throw { message: 'hub slot should be a number.' };
 		var idx = Math.round(data.hub_slot);
 		if(idx < 0)
-			return fail(999, 'Specified hub doesn\'t have negative slots.');
+			throw { message: 'Specified hub doesn\'t have negative slots.' };
 		if(idx >= hub.hub_slots.length)
-			return fail(999, 'Specified hub doesn\'t have that many slots.');
+			throw { message: 'Specified hub doesn\'t have that many slots.' };
 		if(hub.hub_slots[idx])
-			return fail(999, 'hub '+data.hub+' slot '+idx+' occupied by '+hub.hub_slots[idx].id+'.');
+			throw { message: 'hub '+data.hub+' slot '+idx+' occupied by '+hub.hub_slots[idx].id+'.' };
 
 		var o = target.manipulator_slot;
 		hub.hub_slots[idx] = o;
@@ -570,24 +582,24 @@ io.sockets.on('connection', function (socket) {
 		delete target.manipulator_slot.velocity;
 		delete target.manipulator_slot.grabbed_by;
 		delete target.manipulator_slot;
-		socket.emit('manipulator attached', { manipulator: { id: target.id }, hub: { id: hub.id }, slot: idx, object: { id: o.id } });
+		return { manipulator: { id: target.id }, hub: { id: hub.id }, slot: idx, object: { id: o.id } };
 	});
 
 	on('manipulator detach', function(target, data) {
-		if(!check_feature(target, 'manipulator'))
-			return;
+		check_feature(target, 'manipulator');
+
 		if(typeof target.manipulator_slot !== 'undefined')
-			return fail(999, 'Manipulator not empty');
+			throw { message: 'Manipulator not empty' };
 		var hub = find_co_component(target, data.hub, 'hub');
 		if(typeof data.hub_slot !== 'number')
-			return fail(999, 'hub slot should be a number.');
+			throw { message: 'Hub slot should be a number.' };
 		var idx = Math.round(data.hub_slot);
 		if(idx < 0)
-			return fail(999, 'Specified hub doesn\'t have negative slots.');
+			throw { message: 'Specified hub doesn\'t have negative slots.' };
 		if(idx >= hub.hub_slots.length)
-			return fail(999, 'Specified hub doesn\'t have that many slots.');
+			throw { message: 'Specified hub doesn\'t have that many slots.' };
 		if(!hub.hub_slots[idx])
-			return fail(999, 'Nothing in hub '+data.hub+' slot '+idx+'.');
+			throw { message: 'Nothing in hub '+data.hub+' slot '+idx+'.' };
 
 		target.manipulator_slot = hub.hub_slots[idx];
 		hub.hub_slots[idx] = null;
@@ -595,20 +607,7 @@ io.sockets.on('connection', function (socket) {
 		target.manipulator_slot.grabbed_by = target;
 		target.manipulator_slot.position = vectors.create(common.get_root(target).position);
 		target.manipulator_slot.velocity = vectors.create(common.get_root(target).velocity);
-		socket.emit('manipulator detached', { manipulator: stub(target), hub: stub(hub), slot: idx, object: stub(target.manipulator_slot) });
-	});
-
-	on('manipulator release', function(target, data) {
-		if(!check_feature(target, 'manipulator')) return;
-
-		if(typeof target.manipulator_slot === 'undefined') {
-			return fail(999, 'Manipulator empty.');
-		}
-
-		delete target.manipulator_slot.grabbed_by;
-		delete target.manipulator_slot;
-
-		socket.emit('manipulator released', { id: target.id });
+		return { manipulator: stub(target), hub: stub(hub), slot: idx, object: stub(target.manipulator_slot) };
 	});
 
 	var find_co_component = function(source, id, feature) {
@@ -621,14 +620,14 @@ io.sockets.on('connection', function (socket) {
 	};
 
 	on('manipulator repulse', function(target, data) {
-		if(!check_feature(target, 'manipulator'))
-			return;
+		check_feature(target, 'manipulator');
+
 		if(typeof target.manipulator_slot === 'undefined')
-			return fail(999, 'Manipulator empty.');
+			throw { message: 'Manipulator empty.' };
 		if(!Array.isArray(data.direction))
-			return fail(999, 'Repulse direction should be an array.');
+			throw { message: 'Repulse direction should be an array.' };
 		if(data.direction.length != 3)
-			return fail(999, 'Repulse direction should have length 3.');
+			throw { message: 'Repulse direction should have length 3.' };
 		var energy_source = find_co_component(target, data.energy_source, 'battery');
 		if(typeof energy_source === 'undefined') return;
 
@@ -663,7 +662,7 @@ io.sockets.on('connection', function (socket) {
 			throw { code: 13, message: 'Ordered impulse exceeds drive capabilities.' };
 		}
 		if(cmd.impulse <= 0) {
-			throw { code: 999, message: 'Impulse must be greather than 0.' };
+			throw { message: 'Impulse must be greather than 0.' };
 		}
 		var energy = reaction_mass * cmd.impulse;
 		battery_check(energy_source, energy);
@@ -730,7 +729,7 @@ io.sockets.on('connection', function (socket) {
 	});
 
 	on('refinery refine', function(target, data) {
-		if(!check_feature(target, 'refinery')) return;
+		check_feature(target, 'refinery');
 		var store = find_co_component(target, data.store, 'store');
 		if(typeof store === 'undefined') return;
 		var material = find_co_component(target, data.material);
@@ -766,14 +765,14 @@ io.sockets.on('connection', function (socket) {
 	});
 
 	on('store move', function(target, data) {
-		if(!check_feature(target, 'store')) return;
+		check_feature(target, 'store');
 		var store = find_co_component(target, data.store, 'store');
 		if(typeof store === 'undefined') return;
 		var composition = data.composition;
 		if(typeof composition === 'undefined') return;
 
 		if(!resources.lte(composition, store.store_stored)) {
-			return fail(999, 'Not enough resources in store.');
+			throw { message: 'Not enough resources in store.' };
 		}
 
 		var stored = resources.get_mass(target.store_stored);
@@ -782,7 +781,7 @@ io.sockets.on('connection', function (socket) {
 		var material_mass = resources.get_mass(composition);
 
 		if(material_mass > space_left)
-			return fail(999, 'Not enough space left in target store');
+			throw { message: 'Not enough space left in target store' };
 
 		resources.subtract(store.store_stored, composition);
 		resources.add(target.store_stored, composition);
@@ -791,7 +790,7 @@ io.sockets.on('connection', function (socket) {
 	});
 
 	on('battery move', function(target, data) {
-		if(!check_feature(target, 'battery')) return;
+		check_feature(target, 'battery');
 		var battery = find_co_component(target, data.battery, 'battery');
 		if(typeof battery === 'undefined') return;
 		battery_check(battery, data.energy);
@@ -800,7 +799,7 @@ io.sockets.on('connection', function (socket) {
 		var space_left = target.battery_capacity - target.battery_energy;
 
 		if(energy > space_left)
-			return fail(999, 'Not enough space left in target battery');
+			throw { message: 'Not enough space left in target battery' };
 
 		battery.battery_energy -= energy;
 		target.battery_energy += energy;
@@ -810,7 +809,7 @@ io.sockets.on('connection', function (socket) {
 
 
 	on('laboratory invent', function(target, json) {
-		if(!check_feature(target, 'laboratory')) return;
+		check_feature(target, 'laboratory');
 		var laboratory = target;
 		check(json.slot, "Slot number must be an integer").isInt();
 		check(json.slot, "Slot number must be >= 0").min(0);
@@ -830,7 +829,7 @@ io.sockets.on('connection', function (socket) {
 	});
 
 	on('laboratory abandon', function(target, json) {
-		if(!check_feature(target, 'laboratory')) return;
+		check_feature(target, 'laboratory');
 		var laboratory = target;
 		check(json.slot, "Slot number must be an integer").isInt();
 		check(json.slot, "Slot number must be >= 0").min(0);
@@ -842,7 +841,7 @@ io.sockets.on('connection', function (socket) {
 	});
 
 	on('assembler estimate', function(target, json) {
-		if(!check_feature(target, 'assembler')) return;
+		check_feature(target, 'assembler');
 		var laboratory = find_co_component(target, json.laboratory, 'laboratory');
 		check(json.slot, "Slot number must be an integer").isInt();
 		check(json.slot, "Slot number must be >= 0").min(0);
@@ -855,7 +854,7 @@ io.sockets.on('connection', function (socket) {
 	});
 
 	on('assembler build', function(target, json) {
-		if(!check_feature(target, 'assembler')) return;
+		check_feature(target, 'assembler');
 		var laboratory = find_co_component(target, json.laboratory, 'laboratory');
 		check(json.slot, "Slot number must be an integer").isInt();
 		check(json.slot, "Slot number must be >= 0").min(0);
@@ -866,7 +865,7 @@ io.sockets.on('connection', function (socket) {
 		var materials = bp.estimate_materials(blueprint);
 		var store = find_co_component(target, json.store, 'store');
 		if(!resources.lte(materials, store.store_stored))
-			return fail(999, 'Not enough resources in store.');
+			throw { message: 'Not enough resources in store.' };
 		resources.subtract(store.store_stored, materials);
 		var object = bp.realize_blueprint(blueprint);
 		var root = common.get_root(target);

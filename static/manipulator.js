@@ -2,61 +2,53 @@
 var grab = function(x, y, z) {
 	var json = { target: manipulator.id };
 	if(x || y || z) json.position = [x, y, z];
-	socket.emit('manipulator grab', json)
+	send('manipulator grab', json).then(function(data) {
+		objects[data.id].manipulator_slot = stub2object(data.manipulator_slot);
+	});
 };
-
-socket.on('manipulator grabbed', function(data) {
-	var stub = data.manipulator_slot;
-	objects[data.id].manipulator_slot = objects[stub.id];
-});
 
 var release = function() {
-	socket.emit('manipulator release', {target:manipulator.id});
+	return send('manipulator release', { target: manipulator.id }).then(function(data) {
+		delete objects[data.id].manipulator_slot.grabbed_by;
+		delete objects[data.id].manipulator_slot;
+	});
 };
-
-socket.on('manipulator released', function(data) {
-	delete objects[data.id].manipulator_slot;
-});
 
 var attach = function(hub, slot) {
 	hub = common.get(hub);
-	socket.emit('manipulator attach', {target: manipulator.id, hub: hub.id, hub_slot: slot});
+	return send('manipulator attach', { target: manipulator.id, hub: hub.id, hub_slot: slot }).then(function(data) {
+		var hub = stub2object(data.hub);
+		var object = stub2object(data.object);
+		var manipulator = stub2object(data.manipulator);
+		hub.hub_slots[data.slot] = object;
+		object.parent = hub;
+		delete object.position;
+		delete object.velocity;
+		delete object.grabbed_by;
+		delete manipulator.manipulator_slot;
+	});
 };
-
-socket.on('manipulator attached', function(data) {
-	var s = common.get(data.hub.id);
-	var o = common.get(data.object.id);
-	var m = common.get(data.manipulator.id);
-	s.hub_slots[data.slot] = o;
-	o.parent = s;
-	delete o.position;
-	delete o.velocity;
-	delete o.grabbed_by;
-	delete m.manipulator_slot;
-	socket.emit('report', { target: o.id });
-});
 
 var detach = function(hub, slot) {
-	var s = common.get(hub);
-	socket.emit('manipulator detach', {target: manipulator.id, hub: s.id, hub_slot: slot});
+	hub = common.get(hub);
+	return send('manipulator detach', { target: manipulator.id, hub: hub.id, hub_slot: slot }).then(function(data) {
+		var hub = stub2object(data.hub);
+		var object = stub2object(data.object);
+		var manipulator = stub2object(data.manipulator);
+
+		manipulator.manipulator_slot = object;
+		hub.hub_slots[data.slot] = null;
+		delete object.parent;
+		object.grabbed_by = hub;
+		object.position = vectors.create(common.get_root(manipulator).position);
+		object.velocity = vectors.create(common.get_root(manipulator).velocity);
+		reporter.remove(object.id);
+	});
 };
-
-socket.on('manipulator detached', function(data) {
-	var s = common.get(data.hub.id);
-	var o = common.get(data.object.id);
-	var m = common.get(data.manipulator.id);
-
-	m.manipulator_slot = o;
-	s.hub_slots[idx] = null;
-	delete o.parent;
-	o.grabbed_by = target;
-	o.position = vectors.create(common.get_root(target).position);
-	o.velocity = vectors.create(common.get_root(target).velocity);
-});
 
 var repulse = function(x, y, z, power) {
 	power = power || manipulator.integrity;
-	socket.emit('manipulator repulse', {
+	return send('manipulator repulse', {
 		target: manipulator.id,
 		energy_source: battery.id,
 		power: power,
