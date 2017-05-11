@@ -22,11 +22,11 @@
 		'store': 100
 	};
 
-  var sprites = {
-    'assembler': '/assembler101.png',
-    'avatar': '/avatar28.png',
-    'battery': '/battery37.png'
-  };
+	var sprites = {
+		'assembler': '/assembler101.png',
+		'avatar': '/avatar28.png',
+		'battery': '/battery37.png'
+	};
 
 	var clone = function(obj) {
 		var target = {};
@@ -302,11 +302,11 @@
 				object.features[feature] = true;
 
 				if(typeof object.sprite === 'undefined') {
-          if(feature in sprites) {
-            object.sprite = sprites[feature];
-          } else {
-					  object.sprite = '/' + feature + '.png';
-          }
+					if(feature in sprites) {
+						object.sprite = sprites[feature];
+					} else {
+						object.sprite = '/' + feature + '.png';
+					}
 				}
 
 				for(var prop in blueprint[feature]) {

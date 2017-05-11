@@ -4,60 +4,60 @@
 		common = require('./common');
 	}
 
-    /*
+	/*
 
-      This module contains functions to manage 'composition' of
-      objects.
+		This module contains functions to manage 'composition' of
+		objects.
 
-      API Rules:
-      
-      Constructors are methods starting with 'make_'. They always
-      return newly created arrays.
+		API Rules:
 
-      Methods (actually functions) may MODIFY parameters. Only methods
-      starting with 'get_' are guaranteed not to modify parameters.
+		Constructors are methods starting with 'make_'. They always
+		return newly created arrays.
 
-      Parameters should be passed as arrays or objects with field
-      'composition'.
-     */
+		Methods (actually functions) may MODIFY parameters. Only methods
+		starting with 'get_' are guaranteed not to modify parameters.
 
-    var get_array = function(arg) {
-        if(Array.isArray(arg)) return arg;
-        if(typeof arg === 'object') {
-          if('composition' in arg) return arg.composition;
-          if('mass' in arg) return [ arg.mass ];
-        }
-        throw 'Argument isn\'t an array or object with composition.';
-    };
+		Parameters should be passed as arrays or objects with field
+		'composition'.
+	 */
 
-    var num = function(x) {
-        return (typeof x === 'number' ? x : 0);
-    };
-
-	var get_mass = e.get_mass = function(o) {
-    try {
-      return get_array(o).reduce(function(a, b) { return a+b; });
-    } catch(e) {
-      return 0;
-    }
+	var get_array = function(arg) {
+		if(Array.isArray(arg)) return arg;
+		if(typeof arg === 'object') {
+			if('composition' in arg) return arg.composition;
+			if('mass' in arg) return [ arg.mass ];
+		}
+		throw 'Argument isn\'t an array or object with composition.';
 	};
 
-    var init_arr = function(arr) {
+	var num = function(x) {
+		return (typeof x === 'number' ? x : 0);
+	};
+
+	var get_mass = e.get_mass = function(o) {
+		try {
+			return get_array(o).reduce(function(a, b) { return a+b; });
+		} catch(e) {
+			return 0;
+		}
+	};
+
+	var init_arr = function(arr) {
 		Object.defineProperty(arr, 'inspect', {
 			value: function() {
 				return '['+Math.round(get_mass(this))+' resources]';
 			}
 		});
-        return arr;
-    };
+		return arr;
+	};
 
 	var make_empty = e.make_empty = function() {
 		return init_arr(new Array(100));
 	};
 
 	var make_copy = e.make_copy = function(o) {
-        var arr = get_array(o);
-        return init_arr(arr.slice(0));
+		var arr = get_array(o);
+		return init_arr(arr.slice(0));
 	};
 
 	var make_resources = e.make_resources = function(total, most_probable, range) {
@@ -81,11 +81,11 @@
 	};
 
 	var lte = e.lte = function(a, b) {
-        return a.every(function(v, i) { return v <= num(b[i]); });
+			return a.every(function(v, i) { return v <= num(b[i]); });
 	};
 
 	var gte = e.gte = function(a, b) {
-        return b.every(function(v, i) { return v < num(a[i]); });
+			return b.every(function(v, i) { return v < num(a[i]); });
 	};
 
 	var get_connected_mass = e.get_connected_mass = function(o) {
@@ -97,32 +97,32 @@
 		return mass;
 	};
 
-	var add  = e.add = function(o, p) {
-        var arr = get_array(o);
-        var brr = get_array(p);
-        brr.forEach(function(v, i) { arr[i] = num(arr[i]) + v; });
+	var add = e.add = function(o, p) {
+		var arr = get_array(o);
+		var brr = get_array(p);
+		brr.forEach(function(v, i) { arr[i] = num(arr[i]) + v; });
 	};
 
-	var subtract  = e.subtract = function(o, p) {
-        var arr = get_array(o);
-        var brr = get_array(p);
-        brr.forEach(function(v, i) { 
-            arr[i] = num(arr[i]) - v; 
-            if(arr[i] < 0) 
-                throw 'Negative value after resource subtraction (at index ' + i + ')';
-        });
+	var subtract = e.subtract = function(o, p) {
+		var arr = get_array(o);
+		var brr = get_array(p);
+		brr.forEach(function(v, i) {
+			arr[i] = num(arr[i]) - v;
+			if(arr[i] < 0)
+				throw 'Negative value after resource subtraction (at index ' + i + ')';
+		});
 	};
 
-    var clear = e.clear = function(o) {
-        var arr = get_array(o);
-        arr.forEach(function(v, i) { delete arr[i]; });
-    };
+	var clear = e.clear = function(o) {
+		var arr = get_array(o);
+		arr.forEach(function(v, i) { delete arr[i]; });
+	};
 
-	var multiply  = e.multiply = function(o, factor) {
-        if(factor < 0)
-            throw 'Scaling resources by negative factor: ' + factor;
-        var arr = get_array(o);
-        arr.forEach(function(v, i) { arr[i] = v * factor; });
+	var multiply = e.multiply = function(o, factor) {
+		if(factor < 0)
+			throw 'Scaling resources by negative factor: ' + factor;
+		var arr = get_array(o);
+		arr.forEach(function(v, i) { arr[i] = v * factor; });
 	};
 
 })(typeof exports === 'undefined' ? this['resources'] = {} : exports);

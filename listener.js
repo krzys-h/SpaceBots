@@ -13,7 +13,7 @@ if( process.getuid() === 0 ) {
 }
 
 if(typeof argv.keypath === 'undefined' || typeof argv.certpath === 'undefined') {
-	require('findit').sync(__dirname, {},  function(file, stat) {
+	require('findit').sync(__dirname, {},	 function(file, stat) {
 		if(file.indexOf('.pem') == file.length - 4) {
 			if(file.indexOf('cert') >= 0) {
 				if(typeof certpath === 'undefined' || (file.length < certpath.length)) {

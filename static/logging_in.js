@@ -6,30 +6,30 @@
 var socket;
 
 var connect = function() {
-  return new Promise(function(resolve, reject) {
+	return new Promise(function(resolve, reject) {
 
-    socket = io.connect();
+		socket = io.connect();
 
-    // We use the 'connect' event to execute action right after
-    // connection is created.
+		// We use the 'connect' event to execute action right after
+		// connection is created.
 
-    socket.on('connect', resolve());
-    
-  });
+		socket.on('connect', resolve());
+		
+	});
 };
 
 var send = function(command, argument) {
-  if(!command) throw "error: Add command to `send(command, argument)`";
-  if(!argument) throw "error: Add argument object to `send(command, argument)`";
+	if(!command) throw "error: Add command to `send(command, argument)`";
+	if(!argument) throw "error: Add argument object to `send(command, argument)`";
 
-  return new Promise(function(resolve, reject) {
-    socket.emit(command, argument, function(status, reply) {
-      if(status === 'success')
-        resolve(reply);
-      else
-        reject(reply);
-    });
-  });
+	return new Promise(function(resolve, reject) {
+		socket.emit(command, argument, function(status, reply) {
+			if(status === 'success')
+				resolve(reply);
+			else
+				reject(reply);
+		});
+	});
 };
 
 
@@ -41,39 +41,39 @@ var send = function(command, argument) {
 // log in to the game
 
 var log_in = function() {
-  // We don't have an account yet. A player is identified by a long
-  // (32 characters) hexadecimal number called id. SpaceBots uses
-  // such identifiers for most of the stuff found in the game. We
-  // can create new id with `uid` function from `common` module.
+	// We don't have an account yet. A player is identified by a long
+	// (32 characters) hexadecimal number called id. SpaceBots uses
+	// such identifiers for most of the stuff found in the game. We
+	// can create new id with `uid` function from `common` module.
 
-  localStorage.player_id = localStorage.player_id || common.uid();
+	localStorage.player_id = localStorage.player_id || common.uid();
 
-  // We store id in localStorage. This way you will log into the
-  // same account each time you visit the page.
+	// We store id in localStorage. This way you will log into the
+	// same account each time you visit the page.
 
-  // Excercise: calculate, how big is the probability that this
-  // newly generated number could collide with random id of other
-  // player. You can do it now.
+	// Excercise: calculate, how big is the probability that this
+	// newly generated number could collide with random id of other
+	// player. You can do it now.
 
-  // Tip: find a calculator that can handle very small numbers.
+	// Tip: find a calculator that can handle very small numbers.
 
-  // As number of players is much higher than one (offline players
-  // also count) the probability of id collision raises.
+	// As number of players is much higher than one (offline players
+	// also count) the probability of id collision raises.
 
-  // Excercise: calculate how much players should there be to raise
-  // the probability of collision to 1%?
+	// Excercise: calculate how much players should there be to raise
+	// the probability of collision to 1%?
 
-  // Tip: google for birthday paradox
+	// Tip: google for birthday paradox
 
-  // Now that we have an id, we can send it to the server.
+	// Now that we have an id, we can send it to the server.
 
-  console.log("Logging in...");
+	console.log("Logging in...");
 
-  return send('log in', { player_id: localStorage.player_id });
+	return send('log in', { player_id: localStorage.player_id });
 };
 
 var logged_in = connect().then(function () {
-  if(localStorage.tutorial_finished == "true") {
-    return log_in();
-  }
+	if(localStorage.tutorial_finished == "true") {
+		return log_in();
+	}
 });
