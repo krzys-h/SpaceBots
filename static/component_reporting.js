@@ -3,6 +3,7 @@ var reporter = {
 	queue: [],
 	interval: 500,
 	timeout_id: undefined,
+	scan_complete_cb: undefined,
 	loop: function reporter_loop() {
 		reporter.timeout_id = undefined;
 		var id = reporter.queue.shift();
@@ -22,6 +23,10 @@ var reporter = {
 		// We can save it to our `objects` collection:
 
 		obj = report2object(obj);
+
+		// We should record the moment we got our report.
+
+		obj.component_fetch_time = current_time;
 
 		// Now, we could check features of this object and check whether
 		// it deserves special attention
@@ -70,9 +75,26 @@ var reporter = {
 		if(obj.features && obj.features.assembler) {
 			assembler = obj;
 		}
+
+		// Check if all components are scanned already, and resolve the "ready" promise if so
+		if(reporter.everything_scanned() && reporter.scan_complete_cb) {
+			reporter.scan_complete_cb();
+		}
+	},
+	everything_scanned: function () {
+		return Object.values(common.walk(avatar)).reduce(function(val, obj) {
+			if(!obj.component_fetch_time)
+				return false;
+			return val;
+		}, true);
 	},
 	schedule: function reporter_schedule() {
 		var t = reporter.interval * (Math.random() + 1);
+		if(!reporter.everything_scanned()) {
+			// During the initial scanning phase, run the reporter more often
+			// After log in, we need to load data about the whole ship
+			t = 0.25*t;
+		}
 		reporter.timeout_id = setTimeout(reporter.loop, t);
 	},
 	unschedule: function reporter_schedule() {
@@ -93,3 +115,13 @@ var reporter = {
 };
 
 reporter.schedule();
+
+// "ready" promise triggers once the initial scan of all ship components has finished
+// This is a good point to inject your own logic, e.g. a bot
+var ready = logged_in.then(function () {
+	return new Promise(function(resolve, reject) {
+		reporter.scan_complete_cb = resolve;
+	});
+}).then(function() {
+	console.log("Initial scan complete");
+});

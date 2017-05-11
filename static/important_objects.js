@@ -50,10 +50,6 @@ var report2object = function report2object(obj) {
 		objects[obj.id] = obj;
 	}
 
-	// We should record the moment we got our report.
-
-	obj.fetch_time = current_time;
-
 	// Position and velocity information will be sent as arrays: [x,
 	// y, z]. We can convert them into vectors. This way they will be
 	// easier to use.

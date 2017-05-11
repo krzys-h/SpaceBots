@@ -57,7 +57,13 @@ var radio_scanner = {
 		// Let's integrate new information into our own structures. We
 		// will do it the same way as in 'report' handler.
 
-		result.forEach(report2object);
+		result.forEach(function(x) {
+			var obj = report2object(x);
+
+			// We should record the moment we got our report.
+
+			obj.fetch_time = current_time;
+		});
 
 		// After each radio update, we are up-to date with all objects
 		// positions and we are able to execute some additional action that is
