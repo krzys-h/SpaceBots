@@ -6,7 +6,7 @@ var grab = function(x, y, z) {
 };
 
 socket.on('manipulator grabbed', function(data) {
-	var stub = data.manipulator_slot
+	var stub = data.manipulator_slot;
 	objects[data.id].manipulator_slot = objects[stub.id];
 });
 

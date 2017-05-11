@@ -11,7 +11,7 @@ global.warranty = function() {
 
 global.copyright = function() {
 	process.stdout.write(fs.readFileSync('LICENSE').toString());
-}
+};
 
 var nesh = require('nesh');
 nesh.log = logger;
@@ -79,7 +79,7 @@ var make_asteroid = function() {
 		composition: resources.make_resources(common.rnd_exp(5, 10), 14, 20),
 		sprite: '/asteroid100.png',
 		position: vectors.create(),
-		velocity: vectors.create(),
+		velocity: vectors.create()
 	};
 };
 
@@ -253,7 +253,7 @@ var apply_thrust_dmg = function(object, source, v, reduce_dmg) {
 		mass = 0;
 	}
 	return mass;
-}
+};
 
 var apply_thrust = function(object, direction, momentum, reduce_dmg) {
 	logger.info('thrust on ' + object.id.slice(0,4) + ' : ' + momentum);

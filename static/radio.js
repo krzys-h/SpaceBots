@@ -62,7 +62,7 @@ var radio_scanner = {
 		for(var i = 0; i < radio_scanner.callbacks.length; ++i) {
 			var cb = radio_scanner.callbacks[i];
 			cb();
-		};
+		}
 
 	}
 };

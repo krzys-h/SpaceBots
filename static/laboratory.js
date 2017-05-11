@@ -4,7 +4,7 @@ var invent = function(slot, energy) {
 };
 
 socket.on('laboratory invented', function(data) {
-	var slots = objects[data.laboratory.id].laboratory_slots
+	var slots = objects[data.laboratory.id].laboratory_slots;
 	slots[data.slot] = data.blueprint;
 	var details = document.getElementById(data.laboratory.id);
 	if(details) {

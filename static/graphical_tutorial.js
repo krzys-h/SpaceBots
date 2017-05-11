@@ -216,7 +216,7 @@ var tutorial_strings = [
 			common.get_root(avatar).position = vectors.create();
 			common.get_root(avatar).velocity = vectors.create();
 		}, finished: function() {
-			if(!tutorial_strings[tutorial_process].finished_var) tutorial_strings[tutorial_process].finished_var = common.get_root(avatar).position.distanceFrom(objects[tutorial_target_id].position) < 25
+			if(!tutorial_strings[tutorial_process].finished_var) tutorial_strings[tutorial_process].finished_var = common.get_root(avatar).position.distanceFrom(objects[tutorial_target_id].position) < 25;
 			return tutorial_strings[tutorial_process].finished_var;
 		}, finished_var: false},
 	{ text: "Now let's try something harder. There is moving target - go close to it!",
@@ -437,7 +437,7 @@ var tutorial_reset = function() {
 	if(!tutorial_strings[tutorial_process].reset) return;
 
 	tutorial_strings[tutorial_process].reset();
-}
+};
 
 // We should hide the tutorial question if we already finished it, shouldn't we?
 
