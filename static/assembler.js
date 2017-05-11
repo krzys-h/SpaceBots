@@ -1,22 +1,20 @@
 
 var estimate = function(slot) {
-	socket.emit('assembler estimate', { target: assembler.id, laboratory: laboratory.id, slot: slot });
+	return send('assembler estimate', { target: assembler.id, laboratory: laboratory.id, slot: slot }).then(function(data) {
+		console.log('Assembler estimated blueprint to', data.materials);
+		return data.materials;
+	});
 };
 
-socket.on('assembler estimated', function(data) {
-	console.log('Assemblet estimated blueprint to', data.materials);
-});
-
 var build = function(slot) {
-	socket.emit('assembler build', { 
+	return send('assembler build', {
 		target: assembler.id,
 		laboratory: laboratory.id,
 		slot: slot,
 		store: store.id
+	}).then(function(data) {
+		console.log("Assembler has built " + JSON.stringify(data.object, null, '	'));
+		return report2object(data.object);
 	});
 };
 
-socket.on('assembler built', function(data) {
-	//got_report(data.object);
-	console.log("Assembler has built " + JSON.stringify(data.object, null, '	'));
-});

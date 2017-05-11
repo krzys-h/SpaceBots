@@ -761,9 +761,10 @@ io.sockets.on('connection', function (socket) {
 			destroy(material);
 		}
 
-		socket.emit('refinery refined', { id: target.id, refined: Math.min(material_mass, space_left) });
+		return { id: target.id, refined: Math.min(material_mass, space_left) };
 	});
 
+	// TODO: clientside function
 	on('store move', function(target, data) {
 		check_feature(target, 'store');
 		var store = find_co_component(target, data.store, 'store');
@@ -786,9 +787,10 @@ io.sockets.on('connection', function (socket) {
 		resources.subtract(store.store_stored, composition);
 		resources.add(target.store_stored, composition);
 
-		socket.emit('store moved', { id: target.id, moved: composition });
+		return { id: target.id, moved: composition };
 	});
 
+	// TODO: clientside function
 	on('battery move', function(target, data) {
 		check_feature(target, 'battery');
 		var battery = find_co_component(target, data.battery, 'battery');
@@ -804,7 +806,7 @@ io.sockets.on('connection', function (socket) {
 		battery.battery_energy -= energy;
 		target.battery_energy += energy;
 
-		socket.emit('battery moved', { id: target.id, moved: energy });
+		return { id: target.id, moved: energy };
 	});
 
 
@@ -825,7 +827,7 @@ io.sockets.on('connection', function (socket) {
 		var features = bp.random_features(level);
 		var blueprint = bp.randomize_blueprint(bp.make_blueprint(features, level));
 		laboratory.laboratory_slots[slot] = blueprint;
-		socket.emit('laboratory invented', { laboratory: stub(laboratory), slot: slot, blueprint: blueprint});
+		return { laboratory: stub(laboratory), slot: slot, blueprint: blueprint};
 	});
 
 	on('laboratory abandon', function(target, json) {
@@ -836,8 +838,8 @@ io.sockets.on('connection', function (socket) {
 		check(json.slot, "Slot number must not exceed laboratory capacity").max(laboratory.laboratory_slots.length - 1);
 		var slot = sanitize(json.slot).toInt();
 		check(laboratory.laboratory_slots[slot], "Laboratory slot already empty").notNull();
-		socket.emit('laboratory abandoned', { laboratory: stub(laboratory), slot: slot, blueprint: laboratory.laboratory_slots[slot] });
 		laboratory.laboratory_slots[slot] = undefined;
+		return { laboratory: stub(laboratory), slot: slot, blueprint: laboratory.laboratory_slots[slot] };
 	});
 
 	on('assembler estimate', function(target, json) {
@@ -850,7 +852,7 @@ io.sockets.on('connection', function (socket) {
 		check(laboratory.laboratory_slots[slot], "Laboratory slot can't be empty").notNull();
 		var blueprint = laboratory.laboratory_slots[slot];
 		var materials = bp.estimate_materials(blueprint);
-		socket.emit('assembler estimated', { assembler: stub(target), laboratory: stub(laboratory), slot: slot, materials: materials });
+		return { assembler: stub(target), laboratory: stub(laboratory), slot: slot, materials: materials };
 	});
 
 	on('assembler build', function(target, json) {
@@ -871,8 +873,8 @@ io.sockets.on('connection', function (socket) {
 		var root = common.get_root(target);
 		object.position = vectors.create(root.position);
 		object.velocity = vectors.create(root.velocity);
-		socket.emit('assembler built', { assembler: stub(target), laboratory: stub(laboratory), slot: slot, materials: materials, object: object });
 		reg(object);
+		return { assembler: stub(target), laboratory: stub(laboratory), slot: slot, materials: materials, object: object };
 	});
 
 });

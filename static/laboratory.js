@@ -1,26 +1,22 @@
 
 var invent = function(slot, energy) {
-	socket.emit('laboratory invent', { target: laboratory.id, slot: slot, battery: battery.id, energy: energy });
+	return send('laboratory invent', { target: laboratory.id, slot: slot, battery: battery.id, energy: energy }, function(data) {
+		var laboratory = stub2object(data.laboratory);
+		laboratory.laboratory_slots[data.slot] = data.blueprint;
+		var details = document.getElementById(laboratory.id);
+		if(details) {
+			details.querySelector('.laboratory_slots').innerHTML = stringify(laboratory.laboratory_slots);
+		}
+	});
 };
-
-socket.on('laboratory invented', function(data) {
-	var slots = objects[data.laboratory.id].laboratory_slots;
-	slots[data.slot] = data.blueprint;
-	var details = document.getElementById(data.laboratory.id);
-	if(details) {
-		details.querySelector('.laboratory_slots').innerHTML = stringify(slots);
-	}
-});
 
 var abandon = function(slot) {
-	socket.emit('laboratory abandon', { target: laboratory.id, slot: slot });
+	return send('laboratory abandon', { target: laboratory.id, slot: slot }, function(data) {
+		var laboratory = stub2object(data.laboratory);
+		laboratory.laboratory_slots[data.slot] = null;
+		var details = document.getElementById(laboratory.id);
+		if(details) {
+			details.querySelector('.laboratory_slots').innerHTML = stringify(laboratory.laboratory_slots);
+		}
+	});
 };
-
-socket.on('laboratory abandoned', function(data) {
-	var slots = objects[data.laboratory.id].laboratory_slots;
-	slots[data.slot] = null;
-	var details = document.getElementById(data.laboratory.id);
-	if(details) {
-		details.querySelector('.laboratory_slots').innerHTML = stringify(slots);
-	}
-});
