@@ -14,6 +14,10 @@ var connect = function() {
 		// connection is created.
 
 		socket.on('connect', resolve());
+
+		socket.on('fail', function(err) {
+			console.error(err);
+		});
 		
 	});
 };
@@ -80,3 +84,5 @@ var logged_in = connect().then(function () {
 		return log_in();
 	}
 });
+
+// Now continue to avatar_list.js

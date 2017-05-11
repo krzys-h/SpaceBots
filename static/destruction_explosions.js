@@ -19,7 +19,7 @@ socket.on('destroyed', function(stub) {
 		reported: current_time,
 		position: pos,
 		sprite: '/explosion45.png',
-		duration: 1,
+		duration: 1
 	};
 	explosions.push(exp);
 	new Audio('/boom'+Math.floor(Math.random()*3)+'.ogg').play();
