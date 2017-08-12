@@ -17,7 +17,7 @@ var spectrometer_scan = function(material) {
 				max = Math.max(max, data.composition[i]);
 				sum += data.composition[i];
 			}
-			results.appendChild(draw_composition(data.composition, max));
+			results.appendChild(draw_composition(data.composition, max, store ? store.store_stored : null, 'space'));
 			results.appendChild(document.createElement('br'));
 
 			var desc = 'Contains ' + Math.round(sum) + ' resources';

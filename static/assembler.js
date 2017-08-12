@@ -18,7 +18,7 @@ var estimate = function(slot) {
 				max = Math.max(max, data.materials[i]);
 				sum += data.materials[i];
 			}
-			results.appendChild(draw_composition(data.materials, max));
+			results.appendChild(draw_composition(data.materials, max, store ? store.store_stored : null, 'requirements'));
 			results.appendChild(document.createElement('br'));
 
 			var desc = '(' + Math.round(sum) + ' resources)';

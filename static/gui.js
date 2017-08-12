@@ -496,7 +496,7 @@ controls.manipulator = function(elem, object) {
 	elem.appendChild(template.cloneNode(true));
 };
 
-var draw_composition = function(composition, max) {
+var draw_composition = function(composition, max, current_store, current_store_mode) {
 	var scvs = document.createElement('canvas');
 	scvs.width = 200;
 	scvs.height = 100;
@@ -504,12 +504,31 @@ var draw_composition = function(composition, max) {
 	var sctx = scvs.getContext('2d');
 	sctx.fillStyle = '#cccccc';
 	sctx.fillRect(0, 0, 200, 100);
+
 	sctx.lineWidth = 2;
+
 	for(var i = 0; i < 100; ++i) {
 		sctx.beginPath();
 		sctx.moveTo(i*2+1, 100);
 		sctx.lineTo(i*2+1, 100 - composition[i] / max * 100);
 		sctx.stroke();
+	}
+
+	if (current_store) {
+		for (var i = 0; i < 100; ++i) {
+			if(current_store_mode == 'requirements')
+				if (!composition[i])
+					sctx.strokeStyle = 'rgba(0, 0, 255, 0.25)';
+				else {
+					console.log(Number(current_store[i]), Number(composition[i]), Number(current_store[i]) > Number(composition[i]), Number(current_store[i]) > Number(composition[i]) ? 'rgba(0, 255, 0, 0.25)' : 'rgba(255, 0, 0, 0.25)');
+					sctx.strokeStyle = Number(current_store[i]) > Number(composition[i]) ? 'rgba(0, 255, 0, 0.5)' : 'rgba(255, 0, 0, 0.5)';}
+			else
+				sctx.strokeStyle = 'rgba(0, 0, 255, 0.25)';
+			sctx.beginPath();
+			sctx.moveTo(i*2+1, 100);
+			sctx.lineTo(i*2+1, 100 - current_store[i] / max * 100);
+			sctx.stroke();
+		}
 	}
 
 	return scvs;

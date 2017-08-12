@@ -127,5 +127,5 @@ var ready = logged_in.then(function () {
 		reporter.scan_complete_cb = resolve;
 	});
 }).then(function() {
-	console.log("Initial scan complete");
+	onscreen_console.log("Initial scan complete");
 });
