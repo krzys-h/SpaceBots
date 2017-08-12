@@ -205,31 +205,3 @@ NodeList.prototype.text = HTMLCollection.prototype.text = function(text) {
 		}
 	}
 };
-
-document.addEventListener('mousedown', function(e) {
-	if(e.button === 0) {
-		if (e.target.classList.contains('run') && e.target.parentNode.classList.contains('command')) {
-			var command = e.target.parentNode;
-
-			console.group(command.textContent);
-			var promise = Promise.resolve(eval(command.textContent));
-			promise.then(function(data) {
-				if (data)
-					console.log(data);
-			}).catch(function(err) {
-				if(err)
-					if('source' in err && 'message' in err)
-						onscreen_console.error(err.source+': '+err.message);
-					else
-						onscreen_console.error(err);
-				else
-					onscreen_console.error("Error while executing: "+command.textContent);
-			}).then(function() {
-				console.groupEnd();
-			});
-
-			e.preventDefault();
-			e.stopPropagation();
-		}
-	}
-}, false);

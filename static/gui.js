@@ -136,18 +136,6 @@ Float32Array.prototype.drawShadow = function drawShadow(color) {
 // going to be urls and values - images downloaded from the internet.
 var image_cache = {};
 
-var explosions = [];
-socket.on('explosion', function explosion(data) {
-	data.reported = current_time;
-	data.position = vectors.create(data.position);
-	data.screen_position = vectors.create(2);
-	explosions.push(data);
-	new Audio('/boom'+Math.floor(Math.random()*3)+'.ogg').play();
-});
-
-var stars = [];
-var scale = { current: 1, target: 1 };
-
 var get_image = function get_image(url, url2) {
 	if(url2) {
 		if(image_cache[url2] !== 'loading') {
@@ -177,6 +165,25 @@ var get_frame_count = function get_frame_count(filename) {
 	return 1;
 };
 
+// Here, we create an array that will hold information about explosions currently visible on screen
+var explosions = [];
+// Once the server notifies us of an explosion, save it into the array
+socket.on('explosion', function explosion(data) {
+	data.reported = current_time;
+	data.position = vectors.create(data.position);
+	data.screen_position = vectors.create(2);
+	explosions.push(data);
+	new Audio('/boom'+Math.floor(Math.random()*3)+'.ogg').play();
+});
+
+// This array will hold information about stars rendered on the screen
+var stars = [];
+
+// This variable holds information about how zoomed in the view is. The 'current' and 'target' values are used for animation
+var scale = { current: 1, target: 1 };
+
+var quickaccess = document.getElementById("quickaccess").querySelectorAll('img');
+
 // Finally, this is function that will draw everything on the screen.
 var tick = function tick(time) {
 
@@ -190,20 +197,21 @@ var tick = function tick(time) {
 	// The drawing begins with clearing canvas by filling it with background.
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-	var now = +new Date;
-
-	// If we have avatar, we will move camera by 1/10th the distance towards it.
+	// If we have avatar, we will move camera to it.
 	if(avatar && get_position_now(avatar)) {
 		camera = get_position_now(avatar);
 	}
 
+	// We will now update the scale animation
 	scale.current += (scale.target - scale.current) / 5;
 
+	// And apply it
 	ctx.save();
 	ctx.translate(canvas.width / 2, canvas.height / 2);
 	ctx.scale(scale.current, scale.current);
 	ctx.translate(-canvas.width / 2, -canvas.height / 2);
 
+	// First, we render the radio scanner range as a dashed red line
 	if(radio) {
 		ctx.strokeStyle = 'red';
 		ctx.lineWidth = radio.radio_range / 160;
@@ -219,6 +227,7 @@ var tick = function tick(time) {
 	ctx.strokeStyle = 'white';
 	ctx.fillStyle = 'white';
 
+	// Render the background stars
 	var star_life = 200;
 	for(var i = 0; i < stars.length; ++i) {
 		var s = stars[i];
@@ -242,7 +251,8 @@ var tick = function tick(time) {
 		});
 	}
 	
-		
+
+	// TODO: ?!?!?!
 	ctx.save();
 	for(var cid in objects) {
 		var c = objects[cid];
@@ -258,6 +268,7 @@ var tick = function tick(time) {
 	}
 	ctx.restore();
 
+	// Get all objects that have a position defined and sort them
 	var arr = common.dict_to_array(objects).filter(function position_filter(o) {
 		return 'position' in o;
 	});
@@ -338,8 +349,10 @@ var tick = function tick(time) {
 
 	}
 
+	// Draw the explosions
 	draw_explosions(time);
 
+	// Draw manipulator range and possibly the connection to grabbed object
 	if(manipulator) {
 		ctx.strokeStyle = 'white';
 		ctx.setLineDash([1, 8]);
@@ -395,12 +408,24 @@ var tick = function tick(time) {
 	}
 
 
+	// Update the focused object position parameters in the UI
 	if(focused_obj) {
 		var root = common.get_root(focused_obj);
 		var current_pos = get_position_now(root);
 		document.querySelectorAll('.set_x').text(Math.round(current_pos[0]));
 		document.querySelectorAll('.set_y').text(Math.round(current_pos[1]));
 		document.querySelectorAll('.set_z').text(Math.round(current_pos[2]));
+	}
+
+	for(var i = 0; i < quickaccess.length; i++) {
+		var type = quickaccess[i].dataset.feature;
+		if(window[type]) {
+			quickaccess[i].style.opacity = 1;
+			quickaccess[i].title = window[type].id;
+		} else {
+			quickaccess[i].style.opacity = 0.5;
+			quickaccess[i].title = "(not found)";
+		}
 	}
 
 	// Update fetch_time and position if in tutorial mode
@@ -445,6 +470,7 @@ var draw_explosions = function(time) {
 	}
 };
 
+// This object will hold all functions responsible for creating the interface for every feature
 var controls = {};
 
 controls.hub = function(elem, object) {
@@ -616,6 +642,7 @@ controls.enriching_reactor = function(elem, object) {
 	elem.appendChild(template.cloneNode(true));
 };
 
+// Check if the given element is attached anywhere in the document
 var element_in_document = function( element ) {
 	if (element === document) {
 		return true;
@@ -738,6 +765,26 @@ var show_details_for = function(object, event) {
 	return details;
 };
 
+var switch_to_feature_tab = function(details, feature) {
+	var results_div = details.querySelector('.results');
+	while (results_div.hasChildNodes()) {
+		results_div.removeChild(results_div.lastChild);
+	}
+
+	var controls_div = details.querySelector('.controls');
+	while (controls_div.hasChildNodes()) {
+		controls_div.removeChild(controls_div.lastChild);
+	}
+
+	var object = objects[details.id];
+	controls[feature](controls_div, object);
+	controls_div.dataset.feature = feature;
+
+	// Notify the tutorial code that we're changing controls
+
+	if(tutorial_process < tutorial_strings.length && tutorial_strings[tutorial_process].on_controlschange) tutorial_strings[tutorial_process].on_controlschange(details.id, feature);
+};
+
 var find_parent = function(element, className) {
 	while(!element.classList.contains(className)) {
 		element = element.parentElement;
@@ -783,7 +830,7 @@ document.addEventListener('mousedown', function(e) {
 
 	var details = find_parent(e.target, 'details');
 
-	if(details && e.button == 1) {
+	if(details && e.button == 1) { // Middle button on details window?
 		if(details.classList.contains('focused')) {
 			focused_obj = undefined;
 			details.classList.remove('focused');
@@ -791,42 +838,28 @@ document.addEventListener('mousedown', function(e) {
 		details.remove();
 		e.stopPropagation();
 		e.preventDefault();
-	} else if(e.button == 0) {
-		if((e.target.tagName == 'A') && (e.target.href.indexOf('#') >= 0)) {
+	} else if(e.button == 0) { // Left click...
+		if((e.target.tagName == 'A') && (e.target.href.indexOf('#') >= 0)) { // ... on object link?
 			var hash = e.target.href.split('#')[1];
 			show_details_for(objects[hash], e);
 			e.preventDefault();
 			e.stopPropagation();
-		} else if(e.target.classList.contains('feature')) { // 
-			var curr = e.target;
-			var controls_div;
-			while((controls_div = curr.querySelector('.controls')) == null) {
-				curr = curr.parentElement;
-			}
-
-			var details = curr;
+		} else if(e.target.classList.contains('feature')) { // ... on feature button?
+			var details = e.target;
 			while(!details.classList.contains('details')) {
 				details = details.parentElement;
 			}
 
-			var results_div = curr.querySelector('.results');
-			while (results_div.hasChildNodes()) {
-				results_div.removeChild(results_div.lastChild);
-			}
-
-			while (controls_div.hasChildNodes()) {
-				controls_div.removeChild(controls_div.lastChild);
-			}
-
 			var feature = e.target.getAttribute('title');
-			var object = objects[details.id];
-			controls[feature](controls_div, object);
-
-			// Notify the tutorial code that we're changing controls
-
-			if(tutorial_process < tutorial_strings.length && tutorial_strings[tutorial_process].on_controlschange) tutorial_strings[tutorial_process].on_controlschange(details.id, feature);
-
-		} else if(details && can_drag(e.target)) {
+			switch_to_feature_tab(details, feature);
+		} else if (e.target.parentNode && e.target.parentNode.id == 'quickaccess') { // ... on quick access button?
+			if (e.target.title.match(/[0-9A-F]{32}/i)) {
+				var details = show_details_for(objects[e.target.title], e);
+				switch_to_feature_tab(details, e.target.dataset.feature);
+			} else {
+				onscreen_console.error("No "+e.target.dataset.feature+" found");
+			}
+		} else if(details && can_drag(e.target)) { // ... on draggable details window?
 			drag = {
 				dragged: details,
 				x: e.x,
@@ -967,3 +1000,41 @@ onresize = function(e) {
 	if(tutorial_process < tutorial_strings.length && tutorial_strings[tutorial_process].resize) tutorial_strings[tutorial_process].resize();
 };
 onresize();
+
+
+document.addEventListener('mousedown', function(e) {
+	if(e.button === 0) {
+		if (e.target.classList.contains('run') && e.target.parentNode.classList.contains('command')) {
+			var command = e.target.parentNode;
+
+			var details = command;
+			while(details && !details.classList.contains('details')) {
+				details = details.parentNode;
+			}
+			if(details) {
+				var feature = details.querySelector('.controls').dataset.feature;
+				window[feature] = common.get(details.id);
+			}
+
+			console.group(command.textContent);
+			var promise = Promise.resolve(eval(command.textContent));
+			promise.then(function(data) {
+				if (data)
+					console.log(data);
+			}).catch(function(err) {
+				if(err)
+					if('source' in err && 'message' in err)
+						onscreen_console.error(err.source+': '+err.message);
+					else
+						onscreen_console.error(err);
+				else
+					onscreen_console.error("Error while executing: "+command.textContent);
+			}).then(function() {
+				console.groupEnd();
+			});
+
+			e.preventDefault();
+			e.stopPropagation();
+		}
+	}
+}, false);

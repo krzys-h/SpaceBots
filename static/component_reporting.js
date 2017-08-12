@@ -1,7 +1,7 @@
 
 var reporter = {
 	queue: [],
-	interval: 500,
+	interval: 250,
 	timeout_id: undefined,
 	scan_complete_cb: undefined,
 	loop: function reporter_loop() {
@@ -60,31 +60,31 @@ var reporter = {
 
 		// We can use any object with manipulator_range to manipulate
 		// other objects
-		if('manipulator_range' in obj) {
+		if(('manipulator_range' in obj) && (manipulator === undefined)) {
 			manipulator = obj;
 		}
 
-		if('laboratory_tech_level' in obj) {
+		if(('laboratory_tech_level' in obj) && (laboratory === undefined)) {
 			laboratory = obj;
 		}
 
-		if(obj.features && obj.features.refinery) {
+		if(obj.features && obj.features.refinery && refinery === undefined) {
 			refinery = obj;
 		}
 
-		if(obj.features && obj.features.assembler) {
+		if(obj.features && obj.features.assembler && assembler === undefined) {
 			assembler = obj;
 		}
 
-		if(obj.features && obj.features.spectrometer) {
+		if(obj.features && obj.features.spectrometer && spectrometer === undefined) {
 			spectrometer = obj;
 		}
 
-		if(obj.features && obj.features.burning_reactor) {
+		if(obj.features && obj.features.burning_reactor && burning_reactor === undefined) {
 			burning_reactor = obj;
 		}
 
-		if(obj.features && obj.features.enriching_reactor) {
+		if(obj.features && obj.features.enriching_reactor && enriching_reactor === undefined) {
 			enriching_reactor = obj;
 		}
 

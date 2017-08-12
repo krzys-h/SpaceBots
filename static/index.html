@@ -230,6 +230,11 @@ li:nth-child(2n-1) {
 	border-radius: 3px;
 	display: none;
 }
+#quickaccess {
+	position: fixed;
+	bottom: 0;
+	right: 0;
+}
 .destroyed {
 	font-size: 1.5em;
 	margin: .2em;
@@ -382,6 +387,20 @@ li:nth-child(2n-1) {
 		<tr class="window_text deep"><td>Do you want to start a tutorial?<br />
 		<input type="button" onclick="tutorial_start()" value="Yes" /> <input type="button" onclick="tutorial_skip()" value="No" /></td></tr>
 	</table>
+	<div id="quickaccess">
+		<img src="/features/avatar.png" data-feature="avatar">
+		<img src="/features/radio.png" data-feature="radio">
+		<img src="/features/impulse_drive.png" data-feature="impulse_drive">
+		<img src="/features/store.png" data-feature="store">
+		<img src="/features/battery.png" data-feature="battery">
+		<img src="/features/manipulator.png" data-feature="manipulator">
+		<img src="/features/refinery.png" data-feature="refinery">
+		<img src="/features/laboratory.png" data-feature="laboratory">
+		<img src="/features/assembler.png" data-feature="assembler">
+		<img src="/features/spectrometer.png" data-feature="spectrometer">
+		<img src="/features/burning_reactor.png" data-feature="burning_reactor">
+		<img src="/features/enriching_reactor.png" data-feature="enriching_reactor">
+	</div>
 </div>
 <template id="details">
     <div class="details">
