@@ -502,6 +502,8 @@ var draw_composition = function(composition, max) {
 	scvs.height = 100;
 
 	var sctx = scvs.getContext('2d');
+	sctx.fillStyle = '#cccccc';
+	sctx.fillRect(0, 0, 200, 100);
 	sctx.lineWidth = 2;
 	for(var i = 0; i < 100; ++i) {
 		sctx.beginPath();
@@ -522,6 +524,7 @@ controls.store = function(elem, object) {
 	}
 
 	elem.appendChild(draw_composition(object.store_stored, max));
+	elem.appendChild(document.createElement('br'));
 
 	var desc = 'Filled ' + Math.round(sum) + '/' + Math.round(object.store_capacity);
 	elem.appendChild(document.createTextNode(desc));
@@ -543,13 +546,27 @@ var stringify = function(o) {
 		if(typeof value === 'number') {
 			return Math.round(value*100)/100;
 		}
+		if(key == 'resources') {
+			return null; // TODO: This makes the display wrong
+		}
 		return value;
-	}, '	').replace(/\n/g, '<br>').replace(/ /g, '&nbsp;')
+	}, '	');
 };
 
 controls.laboratory = function(elem, object) {
 	var template = document.getElementById("laboratory_controls").content;
-	template.querySelector('.laboratory_slots').innerHTML = stringify(object.laboratory_slots);
+	var slots = template.querySelector('.laboratory_slots');
+	while (slots.hasChildNodes())
+		slots.removeChild(slots.lastChild);
+	slots.appendChild(document.createTextNode('['));
+	slots.appendChild(document.createElement('br'));
+	for(var i = 0; i < object.laboratory_slots.length; i++) {
+		var code = document.createElement('div');
+		code.style = 'white-space: pre-wrap; font-family: monospace; background: #EEEEEE; border: 1px dashed; margin: 2px; padding: 2px; border-radius: 5px;';
+		code.appendChild(document.createTextNode(stringify(object.laboratory_slots[i])));
+		slots.appendChild(code);
+	}
+	slots.appendChild(document.createTextNode(']'));
 	elem.appendChild(template.cloneNode(true));
 };
 
@@ -761,6 +778,11 @@ document.addEventListener('mousedown', function(e) {
 			var details = curr;
 			while(!details.classList.contains('details')) {
 				details = details.parentElement;
+			}
+
+			var results_div = curr.querySelector('.results');
+			while (results_div.hasChildNodes()) {
+				results_div.removeChild(results_div.lastChild);
 			}
 
 			while (controls_div.hasChildNodes()) {

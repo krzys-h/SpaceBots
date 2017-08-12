@@ -139,13 +139,23 @@ var run_script = function(data, title) {
 
 // On-screen console
 
-/*(function() {
+var onscreen_console = {};
+(function() {
 	var make_logger = function(style, command) {
 		return function() {
 			var c = document.getElementById('console');
 			var m = document.createElement('div');
 			if(style) m.classList.add(style);
-			var t = Array.prototype.join.call(arguments, ' ');
+			new Audio(style == 'error' ? '/error.wav' : '/warn.wav').play();
+			// var t = Array.prototype.join.call(arguments, ' ');
+			var t = "";
+			for(var i = 0; i < arguments.length; i++) {
+				t += (i != 0 ? " " : "");
+				if(typeof arguments[i] == 'object')
+					t += JSON.stringify(arguments[i]);
+				else
+					t += arguments[i];
+			}
 			m.innerText = t;
 			c.appendChild(m);
 			setTimeout(function() {
@@ -154,11 +164,17 @@ var run_script = function(data, title) {
 			command.apply(this, arguments);
 		}
 	};
-	console.log = make_logger(null, console.log);
-	console.info = make_logger('info', console.info);
-	console.warn = make_logger('warn', console.warn);
-	console.error = make_logger('error', console.error);
-})();*/
+	onscreen_console.log = make_logger(null, console.log);
+	onscreen_console.info = make_logger('info', console.info);
+	onscreen_console.warn = make_logger('warn', console.warn);
+	onscreen_console.error = make_logger('error', console.error);
+	/*
+	console.log = onscreen_console.log;
+	console.info = onscreen_console.info;
+	console.warn = onscreen_console.warn;
+	console.error = onscreen_console.error;
+	 */
+})();
 
 
 // Extend Element with utility functions...
@@ -202,9 +218,12 @@ document.addEventListener('mousedown', function(e) {
 					console.log(data);
 			}).catch(function(err) {
 				if(err)
-					console.error(err);
+					if('source' in err && 'message' in err)
+						onscreen_console.error(err.source+': '+err.message);
+					else
+						onscreen_console.error(err);
 				else
-					console.error("Error while executing: "+command.textContent);
+					onscreen_console.error("Error while executing: "+command.textContent);
 			}).then(function() {
 				console.groupEnd();
 			});
