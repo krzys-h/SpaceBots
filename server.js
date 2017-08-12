@@ -307,6 +307,8 @@ io.sockets.on('connection', function (socket) {
 
 	// true if limit exceeded, false if ok
 	var test_command_limit = function() {
+		return false; // DISABLED
+
 		var now = (new Date).getTime() / 1000;
 		var ten_before = last_commands.shift();
 		last_commands.push(now);

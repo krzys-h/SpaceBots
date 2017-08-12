@@ -1,6 +1,6 @@
 
 var radio_scanner = {
-	interval: 1000,
+	interval: 250,
 	timeout_id: undefined,
 	callbacks: [],
 	status: function() {
