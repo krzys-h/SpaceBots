@@ -80,6 +80,14 @@ var reporter = {
 			spectrometer = obj;
 		}
 
+		if(obj.features && obj.features.burning_reactor) {
+			burning_reactor = obj;
+		}
+
+		if(obj.features && obj.features.enriching_reactor) {
+			enriching_reactor = obj;
+		}
+
 		// Check if all components are scanned already, and resolve the "ready" promise if so
 		if(reporter.everything_scanned() && reporter.scan_complete_cb) {
 			reporter.scan_complete_cb();

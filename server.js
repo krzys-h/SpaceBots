@@ -873,4 +873,99 @@ io.sockets.on('connection', function (socket) {
 		return { material: stub(material), composition: material.composition };
 	});
 
+	on('reactor burn', function(target, json) {
+		check_feature(target, 'burning_reactor');
+		var store = find_co_component(target, json.store, 'store');
+		var battery = find_co_component(target, json.battery, 'battery');
+		check(json.resource, "Resource number must be an integer").isInt();
+		check(json.resource, "Resource number must be >= 0").min(0);
+		check(json.resource, "Resource number must be < 100").max(99);
+		var resource = sanitize(json.resource).toInt();
+		check(json.target_resource, "Target resource number must be an integer").isInt();
+		check(json.target_resource, "Target resource number must be >= 0").min(0);
+		check(json.target_resource, "Target resource number must be < 100").max(99);
+		var target_resource = sanitize(json.target_resource).toInt();
+		check(json.amount, "Amount must be >= 0").min(0);
+		var amount = sanitize(json.amount).toFloat();
+
+		// 25 is iron (remember, starting at 0!)
+		if (resource < 25) {
+			if (target_resource < resource || target_resource > 25)
+				throw { message: 'Reaction in wrong direction!' };
+		}
+		else if (resource > 25) {
+			if (target_resource > resource || target_resource < 25)
+				throw { message: 'Reaction in wrong direction!' };
+		}
+		else
+			throw { message: 'Cannot generate energy from this resource' };
+
+		var store_request = resources.make_empty();
+		store_request[resource] = amount;
+		if(!resources.lte(store_request, store.store_stored))
+			throw { message: 'Not enough resources in store.' };
+
+		if (amount > target.capacity) {
+			throw { message: 'Ordered amount exceeds reactor capabilities.' };
+		}
+
+		var generated_energy = amount * 1000 * Math.abs(resource-target_resource);
+		var generated_materials = resources.make_empty();
+		generated_materials[target_resource] = amount;
+
+		resources.subtract(store.store_stored, store_request);
+		resources.add(store.store_stored, generated_materials);
+		battery.battery_energy = Math.min(battery.battery_energy + generated_energy, battery.battery_capacity);
+
+		return { 'generated_energy': generated_energy, 'generated_materials': generated_materials };
+	});
+
+	on('reactor enrich', function(target, json) {
+		check_feature(target, 'enriching_reactor');
+		var store = find_co_component(target, json.store, 'store');
+		var battery = find_co_component(target, json.battery, 'battery');
+		check(json.resource, "Resource number must be an integer").isInt();
+		check(json.resource, "Resource number must be >= 0").min(0);
+		check(json.resource, "Resource number must be < 100").max(99);
+		var resource = sanitize(json.resource).toInt();
+		check(json.target_resource, "Target resource number must be an integer").isInt();
+		check(json.target_resource, "Target resource number must be >= 0").min(0);
+		check(json.target_resource, "Target resource number must be < 100").max(99);
+		var target_resource = sanitize(json.target_resource).toInt();
+		check(json.amount, "Amount must be >= 0").min(0);
+		var amount = sanitize(json.amount).toFloat();
+
+		// 25 is iron (remember, starting at 0!)
+		if (resource < 25) {
+			if (target_resource > resource)
+				throw { message: 'Reaction in wrong direction!' };
+		}
+		else if (resource > 25) {
+			if (target_resource < resource)
+				throw { message: 'Reaction in wrong direction!' };
+		}
+
+		var store_request = resources.make_empty();
+		store_request[resource] = amount;
+		if(!resources.lte(store_request, store.store_stored))
+			throw { message: 'Not enough resources in store.' };
+
+		if (amount > target.capacity) {
+			throw { message: 'Ordered amount exceeds reactor capabilities.' };
+		}
+
+		var used_energy = amount * 1000 * Math.abs(resource-target_resource);
+		var generated_materials = resources.make_empty();
+		generated_materials[target_resource] = amount;
+
+		if(used_energy > battery.battery_energy)
+			throw { message: "Required energy exceeds available in battery" };
+
+		resources.subtract(store.store_stored, store_request);
+		resources.add(store.store_stored, generated_materials);
+		battery.battery_energy -= used_energy;
+
+		return { 'used_energy': used_energy, 'generated_materials': generated_materials };
+	});
+
 });

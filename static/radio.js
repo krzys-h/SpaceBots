@@ -84,5 +84,5 @@ socket.on('broadcast', function(data) {
 	var id = data.source.id;
 	if(!messages[id]) messages[id] = [];
 	messages[id].unshift({ text: JSON.stringify(data.message), time: current_time });
-	console.log("Broadcast from " + data.source.id + ": " + JSON.stringify(data.message));
+	onscreen_console.log("Broadcast from " + data.source.id + ": " + JSON.stringify(data.message));
 });

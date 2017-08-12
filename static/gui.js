@@ -521,7 +521,7 @@ var draw_composition = function(composition, max, current_store, current_store_m
 					sctx.strokeStyle = 'rgba(0, 0, 255, 0.25)';
 				else {
 					console.log(Number(current_store[i]), Number(composition[i]), Number(current_store[i]) > Number(composition[i]), Number(current_store[i]) > Number(composition[i]) ? 'rgba(0, 255, 0, 0.25)' : 'rgba(255, 0, 0, 0.25)');
-					sctx.strokeStyle = Number(current_store[i]) > Number(composition[i]) ? 'rgba(0, 255, 0, 0.5)' : 'rgba(255, 0, 0, 0.5)';}
+					sctx.strokeStyle = Number(current_store[i]) >= Number(composition[i]) ? 'rgba(0, 255, 0, 0.5)' : 'rgba(255, 0, 0, 0.5)';}
 			else
 				sctx.strokeStyle = 'rgba(0, 0, 255, 0.25)';
 			sctx.beginPath();
@@ -603,6 +603,16 @@ controls.refinery = function(elem, object) {
 controls.spectrometer = function(elem, object) {
 	var template = document.getElementById("spectrometer_controls").content;
 	template.querySelectorAll('.set_id').text(document.querySelector('.focused').id.substr(0, 4));
+	elem.appendChild(template.cloneNode(true));
+};
+
+controls.burning_reactor = function(elem, object) {
+	var template = document.getElementById("burning_reactor_controls").content;
+	elem.appendChild(template.cloneNode(true));
+};
+
+controls.enriching_reactor = function(elem, object) {
+	var template = document.getElementById("enriching_reactor_controls").content;
 	elem.appendChild(template.cloneNode(true));
 };
 
