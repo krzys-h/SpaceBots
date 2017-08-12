@@ -867,4 +867,10 @@ io.sockets.on('connection', function (socket) {
 		return { assembler: stub(target), laboratory: stub(laboratory), slot: slot, materials: materials, object: object };
 	});
 
+	on('spectrometer scan', function(target, json) {
+		check_feature(target, 'spectrometer');
+		var material = find_co_component(target, json.material);
+		return { material: stub(material), composition: material.composition };
+	});
+
 });

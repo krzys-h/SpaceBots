@@ -496,12 +496,24 @@ controls.manipulator = function(elem, object) {
 	elem.appendChild(template.cloneNode(true));
 };
 
-controls.store = function(elem, object) {
+var draw_composition = function(composition, max) {
 	var scvs = document.createElement('canvas');
 	scvs.width = 200;
 	scvs.height = 100;
-	elem.appendChild(scvs);
 
+	var sctx = scvs.getContext('2d');
+	sctx.lineWidth = 2;
+	for(var i = 0; i < 100; ++i) {
+		sctx.beginPath();
+		sctx.moveTo(i*2+1, 100);
+		sctx.lineTo(i*2+1, 100 - composition[i] / max * 100);
+		sctx.stroke();
+	}
+
+	return scvs;
+};
+
+controls.store = function(elem, object) {
 	var max = 0;
 	var sum = 0;
 	for(var i = 0; i < 100; ++i) {
@@ -509,17 +521,10 @@ controls.store = function(elem, object) {
 		sum += object.store_stored[i];
 	}
 
+	elem.appendChild(draw_composition(object.store_stored, max));
+
 	var desc = 'Filled ' + Math.round(sum) + '/' + Math.round(object.store_capacity);
 	elem.appendChild(document.createTextNode(desc));
-
-	var sctx = scvs.getContext('2d');
-	sctx.lineWidth = 2;
-	for(var i = 0; i < 100; ++i) {
-		sctx.beginPath();
-		sctx.moveTo(i*2+1, 100);
-		sctx.lineTo(i*2+1, 100 - object.store_stored[i] / max * 100);
-		sctx.stroke();
-	}
 };
 
 controls.battery = function(elem, object) {
@@ -555,6 +560,12 @@ controls.assembler = function(elem, object) {
 
 controls.refinery = function(elem, object) {
 	var template = document.getElementById("refinery_controls").content;
+	template.querySelectorAll('.set_id').text(document.querySelector('.focused').id.substr(0, 4));
+	elem.appendChild(template.cloneNode(true));
+};
+
+controls.spectrometer = function(elem, object) {
+	var template = document.getElementById("spectrometer_controls").content;
 	template.querySelectorAll('.set_id').text(document.querySelector('.focused').id.substr(0, 4));
 	elem.appendChild(template.cloneNode(true));
 };

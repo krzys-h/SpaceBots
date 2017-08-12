@@ -76,6 +76,10 @@ var reporter = {
 			assembler = obj;
 		}
 
+		if(obj.features && obj.features.spectrometer) {
+			spectrometer = obj;
+		}
+
 		// Check if all components are scanned already, and resolve the "ready" promise if so
 		if(reporter.everything_scanned() && reporter.scan_complete_cb) {
 			reporter.scan_complete_cb();

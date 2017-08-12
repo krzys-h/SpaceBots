@@ -196,8 +196,18 @@ document.addEventListener('mousedown', function(e) {
 			var command = e.target.parentNode;
 
 			console.group(command.textContent);
-			eval(command.textContent);
-			console.groupEnd();
+			var promise = Promise.resolve(eval(command.textContent));
+			promise.then(function(data) {
+				if (data)
+					console.log(data);
+			}).catch(function(err) {
+				if(err)
+					console.error(err);
+				else
+					console.error("Error while executing: "+command.textContent);
+			}).then(function() {
+				console.groupEnd();
+			});
 
 			e.preventDefault();
 			e.stopPropagation();

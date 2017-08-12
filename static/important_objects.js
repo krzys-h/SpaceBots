@@ -148,3 +148,4 @@ var manipulator;
 // custom components.
 
 var refinery, laboratory, assembler;
+var spectrometer;
