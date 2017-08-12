@@ -380,10 +380,10 @@ var tick = function tick(time) {
 		if(manipulator.manipulator_slot && manipulator.manipulator_slot.position) {
 			ctx.strokeStyle = 'black';
 			ctx.lineWidth = 3;
-			line(manipulator.position, manipulator.manipulator_slot.position);
+			line(common.get_position(manipulator), manipulator.manipulator_slot.position);
 			ctx.strokeStyle = '#00ffaa';
 			ctx.lineWidth = 2;
-			line(manipulator.position, manipulator.manipulator_slot.position);
+			line(common.get_position(manipulator), manipulator.manipulator_slot.position);
 		}
 	}
 

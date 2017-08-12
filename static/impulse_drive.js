@@ -65,6 +65,9 @@ var do_impulse = function(x,y,z,mass,speed) {
 		composition: composition,
 		impulse: impulse,
 		destination: [ x, y, z ]
+	}).then(function() {
+		// If the command was successful, update our storage status
+		resources.subtract(store.store_stored, composition);
 	});
 
 	// Excercise: the above command uses camera location as an origin
