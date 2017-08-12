@@ -505,7 +505,10 @@ controls.hub = function(elem, object) {
 };
 
 controls.avatar = function(elem, object) {
-	elem.appendChild(document.createTextNode('Avatar status: OK'));
+	if(avatar_ids.indexOf(object.id) === -1)
+		elem.appendChild(document.createTextNode('Foreign avatar!'));
+	else
+		elem.appendChild(document.createTextNode('Avatar status: OK'));
 };
 
 controls.radio = function(elem, object) {
@@ -546,7 +549,6 @@ var draw_composition = function(composition, max, current_store, current_store_m
 				if (!composition[i])
 					sctx.strokeStyle = 'rgba(0, 0, 255, 0.25)';
 				else {
-					console.log(Number(current_store[i]), Number(composition[i]), Number(current_store[i]) > Number(composition[i]), Number(current_store[i]) > Number(composition[i]) ? 'rgba(0, 255, 0, 0.25)' : 'rgba(255, 0, 0, 0.25)');
 					sctx.strokeStyle = Number(current_store[i]) >= Number(composition[i]) ? 'rgba(0, 255, 0, 0.5)' : 'rgba(255, 0, 0, 0.5)';}
 			else
 				sctx.strokeStyle = 'rgba(0, 0, 255, 0.25)';
@@ -1004,13 +1006,17 @@ onresize();
 
 document.addEventListener('mousedown', function(e) {
 	if(e.button === 0) {
-		if (e.target.classList.contains('run') && e.target.parentNode.classList.contains('command')) {
-			var command = e.target.parentNode;
+		if (e.target.classList.contains('run')) {
+			var command = e.target;
+			while (!command.classList.contains('command'))
+				command = command.parentNode;
 
 			var details = command;
-			while(details && !details.classList.contains('details')) {
+			while(details && !(details.classList && details.classList.contains('details'))) {
+				console.log(details);
 				details = details.parentNode;
 			}
+			if(!details || !details.classList) details = null; // TODO: ?!?!
 			if(details) {
 				var feature = details.querySelector('.controls').dataset.feature;
 				window[feature] = common.get(details.id);

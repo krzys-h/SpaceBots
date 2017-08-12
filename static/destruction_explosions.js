@@ -1,8 +1,10 @@
 
 socket.on('destroyed', function(stub) {
-	if(stub.id === avatar.id) {
-		document.getElementById('overlay').appendChild(
-			document.getElementById('destroyed').content.cloneNode(true));
+	for(var i = 0; i < quickaccess.length; i++) {
+		var type = quickaccess[i].dataset.feature;
+		if (window[type] && window[type].id == stub.id) {
+			window[type] = null;
+		}
 	}
 	var obj = common.get(stub.id);
 	console.log("Object", obj.id, "has been destroyed");

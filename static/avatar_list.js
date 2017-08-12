@@ -5,9 +5,14 @@
 // are our only way of controlling the world.
 
 logged_in = logged_in.then(function (reply) {
-	var avatar_ids = reply.avatar_list;
+	avatar_ids = reply.avatar_list;
 
 	console.log('Retrieved avatar list', avatar_ids);
+
+	if(avatar_ids.length == 0) {
+		document.getElementById('death_message').style.display = "block";
+		return Promise.reject();
+	}
 
 	// Although you can have much more than one avatar, the basic
 	// interface included on this site, allows you to control only the
@@ -26,4 +31,25 @@ logged_in = logged_in.then(function (reply) {
 
 	return Promise.resolve();
 
+});
+
+socket.on('avatar added', function(new_id) {
+	onscreen_console.log('New avatar added: '+new_id);
+	avatar_ids.push(new_id);
+	reporter.add(new_id);
+});
+
+socket.on('avatar removed', function(lost_id) {
+	onscreen_console.warn('Avatar destroyed: '+lost_id);
+	avatar_ids.splice(avatar_ids.indexOf(lost_id), 1);
+	if(avatar_id == lost_id) {
+		if(avatar_ids.length > 0) {
+			avatar_id = avatar_ids[0];
+			avatar = objects[avatar_id];
+			onscreen_console.log("Changed control to avatar: "+avatar_id)
+		} else {
+			avatar_id = null;
+			document.getElementById('death_message').style.display = "block";
+		}
+	}
 });

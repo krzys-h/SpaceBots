@@ -36,7 +36,7 @@ var build = function(slot) {
 		slot: slot,
 		store: store.id
 	}).then(function(data) {
-		onscreen_console.log('Assembler has built ' + JSON.stringify(data.object, null, '	'));
+		onscreen_console.log('Assembler has built object ' + data.object.id);
 		return report2object(data.object);
 	});
 };

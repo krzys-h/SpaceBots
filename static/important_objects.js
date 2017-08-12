@@ -1,4 +1,5 @@
 
+var avatar_ids = [];
 var avatar_id;
 
 // Excercise: check your avatar id by typing "avatar_id" in the

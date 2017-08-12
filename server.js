@@ -202,7 +202,15 @@ var destroy = global.destroy = function(object) {
 	for(var k in cc) {
 		var o = cc[k];
 		if('avatar' in o.features) {
-			io.sockets.in(k).emit('destroyed', stub(object));
+			io.sockets.in(k).emit('destroyed', stub(object)); // TODO: This will be sent multiple times if there are multiple avatars on the ship
+		}
+	}
+	if('avatar' in object.features) {
+		io.sockets.in(object.id).emit('avatar removed', object.id);
+		for (var pid in objects) {
+			if ('avatars' in objects[pid] && object.id in objects[pid].avatars) {
+				delete objects[pid].avatars[object.id];
+			}
 		}
 	}
 
@@ -346,7 +354,7 @@ io.sockets.on('connection', function (socket) {
 
 		if(!('avatars' in player)) {
 			player = undefined;
-			return callback('fail', { code: 3, message: 'Currputed accound - no avatar list.'});
+			return callback('fail', { code: 3, message: 'Corrputed account - no avatar list.'});
 		}
 		for(var k in player.avatars) {
 			socket.join(k);
@@ -866,6 +874,11 @@ io.sockets.on('connection', function (socket) {
 		object.position = vectors.create(root.position);
 		object.velocity = vectors.create(root.velocity);
 		reg(object);
+		if ('avatar' in object.features) {
+			player.avatars[object.id] = object;
+			socket.join(object.id);
+			socket.emit('avatar added', object.id); // TODO: send to other connections for this player?
+		}
 		return { assembler: stub(target), laboratory: stub(laboratory), slot: slot, materials: materials, object: object };
 	});
 
