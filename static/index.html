@@ -235,6 +235,14 @@ li:nth-child(2n-1) {
 	bottom: 0;
 	right: 0;
 }
+#quickaccess > #avatars {
+	margin-bottom: 15px;
+	margin-right: 5px;
+	text-align: right;
+}
+#quickaccess > #avatars > div {
+	text-align: right;
+}
 .destroyed {
 	font-size: 1.5em;
 	margin: .2em;
@@ -388,6 +396,7 @@ li:nth-child(2n-1) {
 		<input type="button" onclick="tutorial_start()" value="Yes" /> <input type="button" onclick="tutorial_skip()" value="No" /></td></tr>
 	</table>
 	<div id="quickaccess">
+		<div id="avatars"></div>
 		<img src="/features/avatar.png" data-feature="avatar">
 		<img src="/features/radio.png" data-feature="radio">
 		<img src="/features/impulse_drive.png" data-feature="impulse_drive">

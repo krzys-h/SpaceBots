@@ -182,7 +182,7 @@ var stars = [];
 // This variable holds information about how zoomed in the view is. The 'current' and 'target' values are used for animation
 var scale = { current: 1, target: 1 };
 
-var quickaccess = document.getElementById("quickaccess").querySelectorAll('img');
+var quickaccess = document.getElementById('quickaccess').querySelectorAll('img');
 
 // Finally, this is function that will draw everything on the screen.
 var tick = function tick(time) {
@@ -426,6 +426,32 @@ var tick = function tick(time) {
 			quickaccess[i].style.opacity = 0.5;
 			quickaccess[i].title = "(not found)";
 		}
+	}
+
+	var detailsWindows = document.querySelectorAll('.details');
+	for(var i = 0; i < detailsWindows.length; i++) {
+		var details = detailsWindows[i];
+		var featureButtons = details.querySelectorAll('.feature');
+		for(var j = 0; j < featureButtons.length; j++) {
+			var feature = featureButtons[j].title;
+			featureButtons[j].style.opacity = (feature == 'hub' || (window[feature] && window[feature].id == details.id)) ? 1.0 : 0.25;
+		}
+	}
+	var hubObjects = document.querySelectorAll('.controls[data-feature=\'hub\'] > ol > li');
+	for(var i = 0; i < hubObjects.length; i++) {
+		var a = hubObjects[i].querySelector('a');
+		if(!a) continue;
+		var objid = a.href.split('#')[1];
+		var featureButtons = hubObjects[i].querySelectorAll('img');
+		for(var j = 0; j < featureButtons.length; j++) {
+			var feature = featureButtons[j].title;
+			featureButtons[j].style.opacity = (feature == 'hub' || (window[feature] && window[feature].id == objid)) ? 1.0 : 0.25;
+		}
+	}
+	var avatarList = document.getElementById('avatars').querySelectorAll('div');
+	for(var i = 0; i < avatarList.length; i++) {
+		var objid = avatarList[i].querySelector('a').href.split('#')[1];
+		avatarList[i].querySelector('img').style.opacity = (avatar && avatar.id == objid) ? 1.0 : 0.25;
 	}
 
 	// Update fetch_time and position if in tutorial mode
@@ -843,7 +869,12 @@ document.addEventListener('mousedown', function(e) {
 	} else if(e.button == 0) { // Left click...
 		if((e.target.tagName == 'A') && (e.target.href.indexOf('#') >= 0)) { // ... on object link?
 			var hash = e.target.href.split('#')[1];
-			show_details_for(objects[hash], e);
+			if(e.target.parentNode && e.target.parentNode.id.indexOf('avatar') === 0) { // ... in the avatar list?
+				avatar = common.get(hash);
+				onscreen_console.log("Changed active avatar to " + hash);
+			} else { // ... somewhere else?
+				show_details_for(objects[hash], e);
+			}
 			e.preventDefault();
 			e.stopPropagation();
 		} else if(e.target.classList.contains('feature')) { // ... on feature button?
@@ -870,6 +901,19 @@ document.addEventListener('mousedown', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
 			focus_details(details);
+		}
+	} else if(e.button == 2) { // Right click...
+		if(e.target.classList.contains('feature')) { // ... on feature button?
+			var details = e.target;
+			while(!details.classList.contains('details')) {
+				details = details.parentElement;
+			}
+
+			var feature = e.target.getAttribute('title');
+			if(!window[feature] || window[feature].id != details.id) {
+				window[feature] = common.get(details.id);
+				onscreen_console.log("Changed active " + feature + " to " + details.id);
+			}
 		}
 	}
 }, false);
@@ -925,7 +969,7 @@ canvas.addEventListener('mousemove', function(e) {
 
 }, true);
 
-canvas.addEventListener('contextmenu', function(e) {
+document.addEventListener('contextmenu', function(e) {
 	e.preventDefault();
 	return false;
 }, false);
@@ -959,10 +1003,10 @@ canvas.addEventListener('mousedown', function(e) {
 	} else if(e.button == 1) {
 		scale.target = 1;
 	} else if(e.button == 2) {
-			if(hovered)
-					prompt("Press Ctrl + C and Enter.", 'objects["'+hovered.id+'"]');
-			else
-					RMB_pressed = true;
+		if(hovered)
+			prompt("Press Ctrl + C and Enter.", 'objects["'+hovered.id+'"]');
+		else
+			RMB_pressed = true;
 	}
 }, false);
 
@@ -1019,7 +1063,10 @@ document.addEventListener('mousedown', function(e) {
 			if(!details || !details.classList) details = null; // TODO: ?!?!
 			if(details) {
 				var feature = details.querySelector('.controls').dataset.feature;
-				window[feature] = common.get(details.id);
+				if(!window[feature] || window[feature].id != details.id) {
+					window[feature] = common.get(details.id);
+					onscreen_console.log("Changed active " + feature + " to " + details.id);
+				}
 			}
 
 			console.group(command.textContent);

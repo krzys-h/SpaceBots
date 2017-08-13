@@ -33,7 +33,7 @@ var reporter = {
 
 		// If it is our avatar, we'll save it in the global `avatar`
 		// variable.
-		if(obj.id == avatar_id) {
+		if(obj.id == avatar_ids[0] && !avatar) {
 			avatar = obj;
 		}
 
@@ -46,45 +46,45 @@ var reporter = {
 
 		// If this object is capable of hauling mass with high velocities,
 		// we'll save it into impulse_drive variable for later use.
-		if(('impulse_drive_payload' in obj) && (impulse_drive === undefined)) {
+		if(('impulse_drive_payload' in obj) && !impulse_drive) {
 			impulse_drive = obj;
 		}
 
 		// We could alse remember our resource and energy stores:
-		if(('store_stored' in obj) && (store === undefined)) {
+		if(('store_stored' in obj) && !store) {
 			store = obj;
 		}
-		if(('battery_energy' in obj) && (battery === undefined)) {
+		if(('battery_energy' in obj) && !battery) {
 			battery = obj;
 		}
 
 		// We can use any object with manipulator_range to manipulate
 		// other objects
-		if(('manipulator_range' in obj) && (manipulator === undefined)) {
+		if(('manipulator_range' in obj) && !manipulator) {
 			manipulator = obj;
 		}
 
-		if(('laboratory_tech_level' in obj) && (laboratory === undefined)) {
+		if(('laboratory_tech_level' in obj) && !laboratory) {
 			laboratory = obj;
 		}
 
-		if(obj.features && obj.features.refinery && refinery === undefined) {
+		if(obj.features && obj.features.refinery && !refinery) {
 			refinery = obj;
 		}
 
-		if(obj.features && obj.features.assembler && assembler === undefined) {
+		if(obj.features && obj.features.assembler && !assembler) {
 			assembler = obj;
 		}
 
-		if(obj.features && obj.features.spectrometer && spectrometer === undefined) {
+		if(obj.features && obj.features.spectrometer && !spectrometer) {
 			spectrometer = obj;
 		}
 
-		if(obj.features && obj.features.burning_reactor && burning_reactor === undefined) {
+		if(obj.features && obj.features.burning_reactor && !burning_reactor) {
 			burning_reactor = obj;
 		}
 
-		if(obj.features && obj.features.enriching_reactor && enriching_reactor === undefined) {
+		if(obj.features && obj.features.enriching_reactor && !enriching_reactor) {
 			enriching_reactor = obj;
 		}
 

@@ -1,8 +1,7 @@
 
 var avatar_ids = [];
-var avatar_id;
 
-// Excercise: check your avatar id by typing "avatar_id" in the
+// Excercise: check your avatar id by typing "avatar_ids[0]" in the
 // console window. Avatar id, unlike player id can be made public - it
 // simply identifies your avatar in the game. When other players will
 // see your avatar on the radio, it will report the same avatar
