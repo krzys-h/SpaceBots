@@ -769,7 +769,6 @@ io.sockets.on('connection', function (socket) {
 		return { id: target.id, refined: Math.min(material_mass, space_left) };
 	});
 
-	// TODO: clientside function
 	on('store move', function(target, data) {
 		check_feature(target, 'store');
 		var store = find_co_component(target, data.store, 'store');
@@ -793,7 +792,6 @@ io.sockets.on('connection', function (socket) {
 		return { id: target.id, moved: composition };
 	});
 
-	// TODO: clientside function
 	on('battery move', function(target, data) {
 		check_feature(target, 'battery');
 		var battery = find_co_component(target, data.battery, 'battery');

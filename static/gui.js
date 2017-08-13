@@ -593,6 +593,10 @@ var draw_composition = function(composition, max, current_store, current_store_m
 };
 
 controls.store = function(elem, object) {
+	var template = document.getElementById("store_controls").content;
+	template.querySelectorAll('.set_id').text(document.querySelector('.focused').id.substr(0, 4));
+	elem.appendChild(template.cloneNode(true));
+
 	var max = 0;
 	var sum = 0;
 	for(var i = 0; i < 100; ++i) {
@@ -608,6 +612,10 @@ controls.store = function(elem, object) {
 };
 
 controls.battery = function(elem, object) {
+	var template = document.getElementById("battery_controls").content;
+	template.querySelectorAll('.set_id').text(document.querySelector('.focused').id.substr(0, 4));
+	elem.appendChild(template.cloneNode(true));
+
 	var desc = 'Filled ' + Math.round(object.battery_energy) + '/' + Math.round(object.battery_capacity);
 	elem.appendChild(document.createTextNode(desc));
 };
