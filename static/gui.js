@@ -435,6 +435,8 @@ var tick = function tick(time) {
 		for(var j = 0; j < featureButtons.length; j++) {
 			var feature = featureButtons[j].title;
 			featureButtons[j].style.opacity = (feature == 'hub' || (window[feature] && window[feature].id == details.id)) ? 1.0 : 0.25;
+			if(feature == 'avatar')
+				featureButtons[j].src = (avatar_ids.indexOf(details.id) === -1) ? '/features/avatar_disabled.png' : '/features/avatar.png';
 		}
 	}
 	var hubObjects = document.querySelectorAll('.controls[data-feature=\'hub\'] > ol > li');
@@ -446,6 +448,8 @@ var tick = function tick(time) {
 		for(var j = 0; j < featureButtons.length; j++) {
 			var feature = featureButtons[j].title;
 			featureButtons[j].style.opacity = (feature == 'hub' || (window[feature] && window[feature].id == objid)) ? 1.0 : 0.25;
+			if(feature == 'avatar')
+				featureButtons[j].src = (avatar_ids.indexOf(objid) === -1) ? '/features/avatar_disabled.png' : '/features/avatar.png';
 		}
 	}
 	var avatarList = document.getElementById('avatars').querySelectorAll('div');
@@ -911,8 +915,10 @@ document.addEventListener('mousedown', function(e) {
 
 			var feature = e.target.getAttribute('title');
 			if(!window[feature] || window[feature].id != details.id) {
-				window[feature] = common.get(details.id);
-				onscreen_console.log("Changed active " + feature + " to " + details.id);
+				if (feature != 'avatar' || avatar_ids.indexOf(details.id) !== -1) {
+					window[feature] = common.get(details.id);
+					onscreen_console.log("Changed active " + feature + " to " + details.id);
+				}
 			}
 		}
 	}
