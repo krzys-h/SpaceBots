@@ -1,0 +1,124 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>manipulator - SpaceBots</title>
+<link rel=stylesheet href=doc.css>
+<h1>manipulator</h1>
+
+<img src="/features/manipulator.png">
+
+<p><code>manipulator</code> komponent służący do łapania obiektów oraz zarządzania zawartością <a href="hub.html">statku</a>.</p>
+
+<h2>Dodatkowe pola: </h2>
+
+<h3><code>"manipulator_range"</code></h3>
+
+<p>Zasięg manipulatora</p>
+
+<h3><code>"manipulator_slot"</code></h3>
+
+<p>Złapany obiekt</p>
+
+<h2>Funkcje: </h2>
+
+<h3><code>grab()</code></h3>
+
+<p>Złap obiekt znajdujący się w pobliżu manipulatora</p>
+
+<h3><code>grab(x, y, z)</code></h3>
+
+<p>Złap obiekt znajdujący się w pobliżu współrzędnych <code>[x, y, z]</code></p>
+
+<h3><code>release()</code></h3>
+
+<p>Wypuść trzymany obiekt</p>
+
+<h3><code>attach(hub_id, slot_id)</code></h3>
+
+<p>Załaduj trzymany obiekt do statku <code>hub_id</code> do slotu <code>slot_id</code></p>
+
+<h3><code>detach(hub_id, slot_id)</code></h3>
+
+<p>Wyjmij obiekt ze statku <code>hub_id</code> ze slotu <code>slot_id</code> do manipulatora</p>
+
+<h3><code>repulse(x, y, z, power)</code></h3>
+
+<p>Rzuć obiektem z siłą <code>power</code> <i>(0-1, domyślnie 1)</i> w kierunku <code>[x, y, z]</code>. Pozwala uzyskać niewielką prędkość na zasadzie odrzutu. Przydatne w przypadku uszkodzenia silnika.</p>
+
+<h2>Polecenia: </h2>
+
+<h3><code>"manipulator grab"</code></h3>
+
+<p>Łapie obiekt:</p>
+
+<pre><samp>"manipulator grab": {
+  target: "id manipulatora",
+<span class=meta>&lt;</span> position: [ x, y, z ] <span class=meta>&gt;</span>
+} -> {
+  id: "id manipulatora",
+  manipulator_slot: {
+    id: "id złapanego obiektu"
+  }
+}</samp></pre>
+
+<h3><code>"manipulator release"</code></h3>
+
+<p>Wypuszcza obiekt:</p>
+
+<pre><samp>"manipulator release": {
+  target: "id manipulatora"
+} -> {
+  id: "id manipulatora"
+}</samp></pre>
+
+<h3><code>"manipulator attach"</code></h3>
+
+<p>Przyłącza obiekt:</p>
+
+<pre><samp>"manipulator attach": {
+  target: "id manipulatora",
+  hub: "id statku",
+  slot: slot statku
+} -> {
+  manipulator: {
+    id: "id manipulatora"
+  },
+  hub: {
+    id: "id statku"
+  },
+  slot: slot statku,
+  object: {
+    id: "id przyłączonego obiektu"
+  }
+}</samp></pre>
+
+<h3><code>"manipulator detach"</code></h3>
+
+<p>Odłącza obiekt:</p>
+
+<pre><samp>"manipulator detach": {
+  target: "id manipulatora",
+  hub: "id statku",
+  slot: slot statku
+} -> {
+  manipulator: {
+    id: "id manipulatora"
+  },
+  hub: {
+    id: "id statku"
+  },
+  slot: slot statku,
+  object: {
+    id: "id odłączonego obiektu"
+  }
+}</samp></pre>
+
+<h3><code>"manipulator repulse"</code></h3>
+
+<p>Rzuca obiektem</p>
+
+<pre><samp>"manipulator repulse": {
+  target: "id manipulatora",
+  energy_source: "id baterii",
+  power: sila rzutu,
+  direction: [x, y, z]
+} -> undefined</samp></pre>

@@ -1,0 +1,61 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>assembler - SpaceBots</title>
+<link rel=stylesheet href=doc.css>
+<h1>assembler</h1>
+
+<img src="/features/assembler.png">
+
+<p><code>assembler</code> służy do budowania komponentów wynalezionych przez <a href="laboratory.html">laboratorium</a></p>
+
+<h2>Funkcje: </h2>
+
+<h3><code>estimate(slot)</code></h3>
+
+<p>Oszacuj ilość zasobów potrzebną do wybudowania obiektu z projektu zapisanego w slocie <code>slot</code>. Zwraca wymagane zasoby przez <i>Promise</i>.</p>
+
+<h3><code>build(slot)</code></h3>
+
+<p>Wybuduj obiekt z projektu zapisanego w slocie <code>slot</code>. Zwraca zbudowany obiekt przez <i>Promise</i>.</p>
+
+<h2>Polecenia: </h2>
+
+<h3><code>"assembler estimate"</code></h3>
+
+<p>Szacuje wymagane zasoby:</p>
+
+<pre><samp>"assembler estimate": {
+  target: "id assemblera",
+  laboratory: "id laboratorium",
+  slot: slot laboratorium
+} -> {
+  assembler: {
+    id: "id assemblera"
+  },
+  laboratory: {
+    id: "id laboratorium"
+  },
+  slot: slot laboratorium,
+  materials: wymagane materiały
+}</samp></pre>
+
+<h3><code>"assembler build"</code></h3>
+
+<p>Buduje obiekt:</p>
+
+<pre><samp>"laboratory abandon": {
+  target: "id assemblera",
+  laboratory: "id laboratorium",
+  slot: slot laboratorium,
+  store: "id magazynu"
+} -> {
+  assembler: {
+    id: "id assemblera"
+  },
+  laboratory: {
+    id: "id laboratorium"
+  },
+  slot: slot laboratorium,
+  materials: wymagane materiały,
+  object: wybudowany obiekt
+}</samp></pre>

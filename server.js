@@ -466,7 +466,11 @@ io.sockets.on('connection', function (socket) {
 		if('manipulator_slot' in target) {
 			report.manipulator_slot = stub(target.manipulator_slot);
 		}
-		var copy = 'id features position velocity sprite user_sprite integrity radio_range impulse_drive_payload impulse_drive_impulse store_stored store_capacity battery_energy battery_capacity manipulator_range laboratory_slots laboratory_tech_level'.split(' ');
+		report.features = {};
+		for(var x in target.features) {
+			report.features[x] = "/intro_pl/" + x + ".html";
+		}
+		var copy = 'id position velocity sprite user_sprite integrity radio_range impulse_drive_payload impulse_drive_impulse store_stored store_capacity battery_energy battery_capacity manipulator_range laboratory_slots laboratory_tech_level'.split(' ');
 		copy.forEach(function(key) {
 			report[key] = target[key];
 		});
@@ -825,7 +829,7 @@ io.sockets.on('connection', function (socket) {
 		var features = bp.random_features(level);
 		var blueprint = bp.randomize_blueprint(bp.make_blueprint(features, level));
 		laboratory.laboratory_slots[slot] = blueprint;
-		return { laboratory: stub(laboratory), slot: slot, blueprint: blueprint};
+		return { laboratory: stub(laboratory), slot: slot, blueprint: blueprint };
 	});
 
 	on('laboratory abandon', function(target, json) {

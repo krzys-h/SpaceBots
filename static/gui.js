@@ -1071,7 +1071,6 @@ document.addEventListener('mousedown', function(e) {
 
 			var details = command;
 			while(details && !(details.classList && details.classList.contains('details'))) {
-				console.log(details);
 				details = details.parentNode;
 			}
 			if(!details || !details.classList) details = null; // TODO: ?!?!

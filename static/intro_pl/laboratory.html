@@ -1,0 +1,63 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>laboratory - SpaceBots</title>
+<link rel=stylesheet href=doc.css>
+<h1>laboratory</h1>
+
+<img src="/features/laboratory.png">
+
+<p><code>laboratory</code> służy do wynajdowania nowych komponentów</p>
+
+<h2>Dodatkowe pola: </h2>
+
+<h3><code>"laboratory_tech_level"</code></h3>
+
+<p>Poziom zaawansowania technicznego laboratorium. Im wyższy, tym lepsze komponenty można wynaleźć.</p>
+
+<h3><code>"laboratory_slots"</code></h3>
+
+<p>Wynalezione projekty komponentów zapisane w laboratorium</p>
+
+<h2>Funkcje: </h2>
+
+<h3><code>invent(slot, energy)</code></h3>
+
+<p>Wynajdź nowy obiekt wykorzystując <code>energy</code> energii i zapisz go w slocie <code>slot</code>. Im więcej energii poświęcono, tym lepsze obiekty można wynaleźć. Zwraca wynaleziony projekt obiektu przez <i>Promise</i>.</p>
+
+<h3><code>abandon(slot)</code></h3>
+
+<p>Usuń projekt zapisany w slocie <code>slot</code>.</p>
+
+<h2>Polecenia: </h2>
+
+<h3><code>"laboratory invent"</code></h3>
+
+<p>Wynajduje obiekt:</p>
+
+<pre><samp>"laboratory invent": {
+  target: "id laboratorium",
+  slot: slot laboratorium,
+  battery: "id baterii",
+  energy: energia do wykorzystania
+} -> {
+  laboratory: {
+    id: "id laboratorium"
+  },
+  slot: slot laboratorium,
+  blueprint: wynaleziony projekt
+}</samp></pre>
+
+<h3><code>"laboratory abandon"</code></h3>
+
+<p>Porzuca projekt:</p>
+
+<pre><samp>"laboratory abandon": {
+  target: "id laboratorium",
+  slot: slot laboratorium
+} -> {
+  laboratory: {
+    id: "id laboratorium"
+  },
+  slot: slot laboratorium,
+  blueprint: usunięty projekt
+}</samp></pre>

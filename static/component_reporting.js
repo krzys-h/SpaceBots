@@ -68,23 +68,23 @@ var reporter = {
 			laboratory = obj;
 		}
 
-		if(obj.features && obj.features.refinery && !refinery) {
+		if(obj.features.refinery && !refinery) {
 			refinery = obj;
 		}
 
-		if(obj.features && obj.features.assembler && !assembler) {
+		if(obj.features.assembler && !assembler) {
 			assembler = obj;
 		}
 
-		if(obj.features && obj.features.spectrometer && !spectrometer) {
+		if(obj.features.spectrometer && !spectrometer) {
 			spectrometer = obj;
 		}
 
-		if(obj.features && obj.features.burning_reactor && !burning_reactor) {
+		if(obj.features.burning_reactor && !burning_reactor) {
 			burning_reactor = obj;
 		}
 
-		if(obj.features && obj.features.enriching_reactor && !enriching_reactor) {
+		if(obj.features.enriching_reactor && !enriching_reactor) {
 			enriching_reactor = obj;
 		}
 

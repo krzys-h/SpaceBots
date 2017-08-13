@@ -5,6 +5,5 @@ var battery_move = function(from_battery, amount) {
 	return send('battery move', { target: store.id, battery: from_battery.id, energy: amount }).then(function(data) {
 		battery.battery_energy += amount;
 		from_battery.battery_energy -= amount;
-		return data;
 	});
 };

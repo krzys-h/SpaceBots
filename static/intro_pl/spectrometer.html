@@ -1,0 +1,31 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>spectrometer - SpaceBots</title>
+<link rel=stylesheet href=doc.css>
+<h1>spectrometer</h1>
+
+<img src="/features/spectrometer.png">
+
+<p><code>spectrometer</code> służy do badania składu obiektów</p>
+
+<h2>Funkcje: </h2>
+
+<h3><code>spectrometer_scan(obj)</code></h3>
+
+<p>Przeskanuj obiekt <span>obj</span>. Zwraca skład obiektu przez <i>Promise</i>.</p>
+
+<h2>Polecenia: </h2>
+
+<h3><code>"spectrometer scan"</code></h3>
+
+<p>Skanuje obiekt:</p>
+
+<pre><samp>"spectrometer scan": {
+  target: "id spektrometru",
+  material: "id obiektu do przeskanowania"
+} -> {
+  material: {
+    id: "id przetworzonego obiektu",
+  },
+  composition: skład obiektu
+}</samp></pre>

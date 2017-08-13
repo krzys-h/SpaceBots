@@ -1,0 +1,40 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>battery - SpaceBots</title>
+<link rel=stylesheet href=doc.css>
+<h1>battery</h1>
+
+<img src="/features/battery.png">
+
+<p><code>battery</code> służy do przechowywania <a href="mechanika.html#materialy_i_energia">energii</a>. Wiele komponentów wymaga wskazania baterii, która będzie wykorzystywana do operacji</p>
+
+<h2>Dodatkowe pola: </h2>
+
+<h3><code>"battery_capacity"</code></h3>
+
+<p>Pojemność baterii - maksymalna ilość energii, która może być zgromadzona</p>
+
+<h3><code>"battery_energy"</code></h3>
+
+<p>Aktualna ilość zgromadzonej energii</p>
+
+<h2>Funkcje: </h2>
+
+<h3><code>battery_move(from_battery, amount)</code></h3>
+
+<p>Przenosi <code>amount</code> energii z <code>from_battery</code> do aktywnej baterii. Jeśli <code>amount</code> nie jest podany, przenoszona jest cała zgromadzona energia.</p>
+
+<h2>Polecenia: </h2>
+
+<h3><code>"battery move"</code></h3>
+
+<p>Przenosi energię między bateriami:</p>
+
+<pre><samp>"battery move": {
+  target: "id baterii docelowej",
+  baterry: "id baterii źródłowej",
+  energy: "ilość energii do przeniesienia"
+} -> {
+  id: "id baterii docelowej",
+  moved: "przeniesiona energia"
+}</samp></pre>

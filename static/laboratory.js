@@ -11,7 +11,7 @@ var invent = function(slot, energy) {
 			}
 			controls['laboratory'](controls_div, objects[details.id]);
 		}
-		return data;
+		return data.blueprint;
 	});
 };
 
@@ -27,6 +27,5 @@ var abandon = function(slot) {
 			}
 			controls['laboratory'](controls_div, objects[details.id]);
 		}
-		return data;
 	});
 };

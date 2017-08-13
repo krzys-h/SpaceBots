@@ -1,0 +1,30 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>refinery - SpaceBots</title>
+<link rel=stylesheet href=doc.css>
+<h1>refinery</h1>
+
+<img src="/features/refinery.png">
+
+<p><code>refinery</code> służy do przetwarzania obiektów na bazowe surowce, z których są zbudowane. Przetwarzać można zarówno elementy statku jak i <a href="asteroidy.html">asteroidy</a>. Żeby sprawdzić z czego składa się dany obiekt, użyj <a href="spectrometer.html">spektrometru</a>.</p>
+
+<h2>Funkcje: </h2>
+
+<h3><code>refine(obj)</code></h3>
+
+<p>Przetwórz obiekt <span>obj</span> na bazowe surowce. Jeśli obiekt został przetworzony w całości, znika on. Jeśli obiekt przetworzono tylko częściowo (np. z powodu braku miejsca w magazynie) pozostanie on, ale utraci część ze swoich cech. Zwraca ilość przetworzonego materiału przez <i>Promise</i>.</p>
+
+<h2>Polecenia: </h2>
+
+<h3><code>"refinery refine"</code></h3>
+
+<p>Przetwarza obiekt:</p>
+
+<pre><samp>"refinery refine": {
+  target: "id rafinerii",
+  store: "id docelowego magazynu",
+  material: "id materii do przetworzenia"
+} -> {
+  id: "id rafinerii",
+  refined: ilość przetworzonych materiałów
+}</samp></pre>

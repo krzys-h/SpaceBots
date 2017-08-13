@@ -6,14 +6,26 @@
 
 <p>SpaceBots to gra, w której stworzona przez ciebie sztuczna inteligencja będzie walczyć z innymi graczami o rzadkie zasoby, lepsze podzespoły oraz nowe technologie.</p>
 
-<p>Do kodowania będziesz potrzebować najnowszej przeglądarki. Pobierz Google Chrome w najnowszej wersji, czyli tzw. <a href="https://www.google.com/intl/pl/chrome/browser/canary.html">kanarka</a> albo nieco stabilniejszą wersję <a href="https://www.google.com/intl/pl/chrome/browser/beta.html">beta</a>.</p>
+<p>Gra do działania wymaga dość nowej przeglądarki.</p>
 
-<p>Pewnie widziałeś/aś już stronę SpaceBots. Tej oficjalnej nie możesz jednak w wygodny sposób edytować. Pobierz <a href="https://github.com/mafik/SpaceBots/archive/master.zip">kod SpaceBots</a>, rozpakuj go, wejdź do katalogu <code>SpaceBots/static/</code> i uruchom <code>server.exe</code>. Od teraz na twoim komputerze działa serwer http, który pozwoli ci grać w SpaceBots. Możesz na niego wejść przez <a href="http://localhost:8080/">http://localhost:8080/</a>.</p>
-<p>Powinien wyglądać mniej więcej tak:</p>
+<p>Pewnie widziałeś/aś już stronę SpaceBots. Wygląda ona mniej więcej tak:</p>
 <img src="intro_0.png">
-<p>Tak naprawdę łączysz się z oficjalnym serwerem SpaceBots, ale przez to, że kod strony jest teraz na twoim komputerze, możesz pisać własne skrypty oraz modyfikować te wbudowane. Zacznij od wciśnięcia <kbd>F12</kbd>. Powinny otworzyć się tzw. <em>DevToolsy</em>:</p>
+<p>To właśnie tutaj będzie odbywać się większość rozgrywki. W czasie gry dość często używał będziesz konsoli JavaScript dostępnej w tzw. DevTools. Możesz je otworzyć wciskając <kbd>F12</kbd>.</p>
 <img src="intro_1.png">
-<p>Jeśli teraz cokolwiek wyedytujesz, wszystkie zmiany pójdą w zapomnienie po odświeżeniu strony. Żeby Chrome zapisał zmiany, musisz poinformować go, gdzie znajdują się pliki strony.</p>
+<p>W czasie rozgrywki bardzo przydatna będzie możliwość uruchamiania na tej stronie własnego kodu. Jak to jednak zrobić? Istnieje kilka sposobów, zostały one opisane poniżej</p>
+
+<h2>Własne skrypty z serwera HTTP(S)</h2>
+<p>SpaceBots umożliwia wczytywanie skryptów z dowolnego serwera HTTP(S). W tym celu, wpisz poniższą linijkę w konsoli JavaScript i odśwież stronę:</p>
+<code><samp>localStorage.custom_scripts = JSON.stringify(["https://my.server/bot.js"]);</samp></code>
+<p>Pamiętaj jednak, że ładowanie skryptów z serwera HTTP podczas gry po HTTPS wymaga odpowiednich wyjątków bezpieczeństwa w przeglądarce. Na przykład, w przypadku przeglądarki Google Chrome musisz ją uruchomić z parametrem <code>--allow-running-insecure-content</code></p>
+
+<h2>Własne skrypty z systemu plików</h2>
+<p>Postępowanie jest analogiczne jak w przypadku pobierania skryptów z serwera HTTP. Użyj linku podobnego do <code>file:///home/krzys_h/Pulpit/bot.js</code> lub file:///C:/Users/krzys_h/Desktop/bot.js</p>
+<p>Większość przeglądarek wymaga dodatkowej konfiguracji aby ładować skrypty z lokalnego systemu plików. Na przykład w Chrome, uruchom go z parametrem <code>--allow-file-access</code></p>
+
+<h2>Lokalna kopia kodu gry</h2>
+<p>Ta opcja jest najwygodniejsza i daje największą swobodę zmian w całej grze. Pobierz <a href="https://github.com/krzys-h/SpaceBots/archive/master.zip">kod SpaceBots</a>, i skopiuj katalog <code>SpaceBots/static/</code> na dowolny lokalny serwer HTTP.</p>
+<p>Jeśli teraz cokolwiek wyedytujesz przez DevTools, wszystkie zmiany pójdą w zapomnienie po odświeżeniu strony. Żeby Chrome zapisał zmiany, musisz poinformować go, gdzie znajdują się pliki strony.</p>
 <p>Kliknij na ikonę koła zębatego:</p>
 <img src="intro_2.png">
 <p>Potem wybierz <samp>Workspace</samp>:</p>
@@ -34,7 +46,7 @@
 <img src="intro_9.png">
 <p>Po przejściu, wciśnij <kbd>Ctrl + O</kbd> i strzałkami wybierz plik <code>index.html</code>. Możesz wpisać kilka znaków z jego nazwy żeby szybciej do niego dotrzeć. To jego załadowaniu dostaniesz możliwość jego edycji:</p>
 <img src="intro_10.png">
-<p>Teraz edytując stronę możesz spokojnie usunąć lub zmodyfikować elementy strony. Zlokalizuj w kodzie i usuń elementy odpowiedzialne za:</p>
+<p>Teraz edytując stronę możesz spokojnie usunąć lub zmodyfikować elementy strony. Na przykład, zlokalizuj w kodzie i usuń elementy odpowiedzialne za:</p>
 <ul>
   <li>skaczący znak zapytania</li>
   <li>odtwarzacz muzyki</li>

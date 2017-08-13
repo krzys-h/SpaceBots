@@ -1,0 +1,40 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>store - SpaceBots</title>
+<link rel=stylesheet href=doc.css>
+<h1>store</h1>
+
+<img src="/features/store.png">
+
+<p><code>store</code> to magazyn - miejsce gdzie przechowywane są wszystkie zdobyte <a href="mechanika.html#materialy_i_energia">materiały</a>. Wiele komponentów wymaga wskazania magazynu, który będzie wykorzystywany do operacji</p>
+
+<h2>Dodatkowe pola: </h2>
+
+<h3><code>"store_capacity"</code></h3>
+
+<p>Pojemność magazynu - maksymalna masa wszystkich zasobów które mogą być zgromadzone w magazynie</p>
+
+<h3><code>"store_stored"</code></h3>
+
+<p>Aktualny stan magazynu - jest to 100-elementowa tablica, gdzie każdy element odpowiada jednemu pierwiastkowi chemicznemu (0=H, 1=He, 2=Li, 3=Be, 4=B, 5=C, itd.)</p>
+
+<h2>Funkcje: </h2>
+
+<h3><code>store_move(from_store, composition)</code></h3>
+
+<p>Przenosi <code>composition</code> zasobów z <code>from_store</code> do aktywnego magazynu. Jeśli <code>composition</code> nie jest podany, przenoszone są wszystkie zasoby.</p>
+
+<h2>Polecenia: </h2>
+
+<h3><code>"store move"</code></h3>
+
+<p>Przenosi surowce między magazynami:</p>
+
+<pre><samp>"store move": {
+  target: "id magazynu docelowego",
+  store: "id magazynu źródłowego",
+  composition: "zasoby do przeniesienia"
+} -> {
+  id: "id magazynu docelowego",
+  moved: "przeniesione zasoby"
+}</samp></pre>

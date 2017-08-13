@@ -1,0 +1,43 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>impulse_drive - SpaceBots</title>
+<link rel=stylesheet href=doc.css>
+<h1>impulse_drive</h1>
+
+<img src="/impulse_drive.png" style="margin-bottom: 5px;"><br>
+<img src="/features/impulse_drive.png">
+
+<p><code>impulse_drive</code> to silnik działający na zasadzie wyrzucania zgromadzonych <a href="mechanika.html#materialy_i_energia">materiałów</a> w przestrzeń. Jest to najprostszy typ silnika dostępny w grze. Może być również wykorzystywany jako broń poprzez strzelanie materią w przeciwników.</p>
+
+<h2>Dodatkowe pola: </h2>
+
+<h3><code>"impulse_drive_impulse"</code></h3>
+
+<p>Maksymalna szybkość którą można uzyskać jednym wyrzutem materii</p>
+
+<h3><code>"impulse_drive_payload"</code></h3>
+
+<p>Maksymalna ilość materii jaką można wyrzucić za jednym razem</p>
+
+<h2>Funkcje: </h2>
+
+<h3><code>do_impulse(x, y, z, mass, speed)</code></h3>
+
+<p>Wystrzel materię w kierunku <code>[x, y, z]</code> używając <code>mass</code> masy <i>(0-1, domyślnie 1)</i> i prędkości <code>speed</code> <i>(0-1, domyślnie 1)</i></p>
+
+<p>Zobacz też: get_resources_for_waste</p> <!-- TODO: link -->
+
+<h2>Polecenia: </h2>
+
+<h3><code>"impulse_drive push"</code></h3>
+
+<p>Wyrzuca materię:</p>
+
+<pre><samp>"impulse_drive push": {
+  target: "id silnika",
+  energy_source: "id baterii",
+  matter_source: "id magazynu",
+  composition: "mieszanka zasobów do wyrzucenia",
+  impulse: "siła impulsu",
+  destination: [ x, y, z ]
+} -> undefined</samp></pre>
