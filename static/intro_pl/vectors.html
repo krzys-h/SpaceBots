@@ -1,0 +1,58 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Moduł vectors - SpaceBots</title>
+<link rel=stylesheet href=doc.css>
+<h1>Moduł <code>vectors</code></h1>
+
+<p>Moduł ten zawiera funkcje przydatne przy pracy z wektorami (przechowywanymi jako typ <code>Float32Array</code>)</p>
+
+<h2>Tworzenie</h2>
+
+<h3>vectors.create()</h3>
+Tworzy nowy wektor. Jako parametr przyjmuje trzy liczby, trzyelementową tablicę liczb lub nic.
+
+<h3>vectors.zero</h3>
+Stała oznaczająca wektor zerowy
+
+<h3>vectors.random1(s)</h3>
+TODO: ?
+
+<h3>vectors.random2(s)</h3>
+TODO: ?
+
+<h2>Operacje</h2>
+
+<h3>Float32Array.prototype.make_random2(s)</h3>
+TODO: ?
+
+<h3>Float32Array.prototype.add(x, mul = 1)</h3>
+this = this + x * mul
+
+<h3>Float32Array.prototype.subtract(x)</h3>
+this = this - x
+
+<h3>Float32Array.prototype.neg()</h3>
+this = - this
+
+<h3>Float32Array.prototype.scale(s)</h3>
+this = this * s
+
+<h3>Float32Array.prototype.scaleTo(l)</h3>
+Skaluje wektor tak, żeby jego długość wynosiła l
+
+<h3>Float32Array.prototype.normalize()</h3>
+Skaluje wektor tak, żeby jego długość wynosiła 1
+
+<h2>Gettery</h2>
+
+<h3>Float32Array.prototype.len()</h3>
+Zwraca długość wektora
+
+<h3>Float32Array.prototype.dist(x)</h3>
+Zwraca odległość między tym wektorem a x
+
+<h3>Float32Array.prototype.eql(x)</h3>
+Sprawdza czy wektory są równe
+
+<h3>Float32Array.prototype.toJSON(x)</h3>
+Konwertuje wektor na JSON

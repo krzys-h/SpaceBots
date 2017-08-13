@@ -1,0 +1,45 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Moduł resources - SpaceBots</title>
+<link rel=stylesheet href=doc.css>
+<h1>Moduł <code>resources</code></h1>
+
+<p>Moduł ten zawiera funkcje przydatne przy pracy z listami zasobów</p>
+
+<p>Lista zasobów to 100-elementowa tablica, gdzie każdy element odpowiada jednemu pierwiastkowi chemicznemu (0=H, 1=He, 2=Li, 3=Be, 4=B, 5=C, itd.)</p>
+
+<h3>resources.get_mass(o)</h3>
+<p>Zwraca sumaryczną masę surowców w tablicy</p>
+
+<h3>resources.make_empty()</h3>
+<p>Tworzy pustą tablicę surowców</p>
+
+<h3>resources.make_copy(o)</h3>
+<p>Tworzy kopię tablicy surowców</p>
+
+<h3>resources.make_resources(total, most_probable, range)</h3>
+<p>Generuje losowy skład obiektu (używane tylko przez serwer)</p>
+
+<h3>resources.valid(r)</h3>
+<p>Sprawdza czy parametr jest prawidłową tablicą surowców</p>
+
+<h3>resources.lte(a, b)</h3>
+<p>Sprawdza, czy wszystkie elementy tablicy <code>a</code> są mniejsze bądź równe od <code>b</code></p>
+
+<h3>resources.gte(a, b)</h3>
+<p>Sprawdza, czy wszystkie elementy tablicy <code>a</code> są większe bądź równe od <code>b</code></p>
+
+<h3>resources.get_connected_mass(o)</h3>
+<p>Zwraca całkowitą masę obiektu</p>
+
+<h3>resources.add(o, p)</h3>
+<p>Dodaje <code>p</code> do tablicy <code>o</code></p>
+
+<h3>resources.subtract(o, p)</h3>
+<p>Odejmuje <code>p</code> od tablicy <code>o</code></p>
+
+<h3>resources.clear(o)</h3>
+<p>Czyści tablicę <code>o</code></p>
+
+<h3>resources.multiply(o, factor)</h3>
+<p>Mnoży tablicę <code>o</code> przez <code>factor</code></p>

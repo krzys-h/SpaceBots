@@ -1,0 +1,52 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Moduł common - SpaceBots</title>
+<link rel=stylesheet href=doc.css>
+<h1>Moduł <code>common</code></h1>
+
+<p>Moduł ten zawiera funkcje przydatne przy pracy z obiektami w grze</p>
+
+<h3>common.get(x)</h3>
+Znajduje obiekt z <a href="other_useful_functions.html#objects">tablicy <code>objects</code></a>.
+x może być obiektem, identyfikatorem obiektu lub jego fragmentem
+np. <code>get('31')</code> zwraca pierwszy obiekt którego id zaczyna się od 31
+
+<h3>common.uid()</h3>
+Generuje losowy identyfikator zgodny z formatem używanym w grze (16 znaków szesnastkowo).
+
+<h3>common.walk(start, dict, full)</h3>
+TODO: ?
+
+<h3>common.dict_to_array(dict)</h3>
+Konwertuje taki obiekt:<br>
+<code>{ id1: {id: "id1", something: 1}, id2: {id: "id2", something: 2} }</code><br>
+na taką tablicę:<br>
+<code>[ {id: "id1", something: 1}, {id: "id2", something: 2} ]</code><br>
+
+<h3>common.get_root(x)</h3>
+Zwraca główny obiekt rodzica<br>
+Zobacz też: .parent
+
+<h3>common.get_position(x)</h3>
+Zwraca pozycję obiektu, biorąc pod uwagę hierarchię (np. zwraca pozycję statku po podaniu dowolnego komponentu)
+
+<h3>common.get_position(x, pos)</h3>
+Analogicznie, do ustawiania pozycji
+
+<h3>common.rnd11()</h3>
+Zwraca losową liczbę od -1 do 1
+
+<h3>common.rnd1()</h3>
+Zwraca losową liczbę od -1 do 1
+
+<h3>common.rnd_snd()</h3>
+TODO: ?
+<code>return (Math.random()+Math.random()+Math.random())*2-3;</code>
+
+<h3>common.rnd(mean, stddev)</h3>
+TODO: ?
+<code>return rnd_snd() * stddev + mean;</code>
+
+<h3>common.rnd_exp(min, max)</h3>
+TODO: ?
+<code>Math.exp(min + (max - min)*Math.random())</code>
