@@ -19,3 +19,5 @@ npm-debug.log
 .spacebots_history
 encrypt.js
 node_modules/
+
+autosave*.json

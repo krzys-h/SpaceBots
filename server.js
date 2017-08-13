@@ -141,6 +141,85 @@ var random_color = function() {
 var stub = function(obj) {
 	if(obj) return { id: obj.id };
 };
+var stub2object = function(stub) {
+	return objects[stub.id] || (objects[stub.id] = stub);
+};
+
+var save = global.save = function(filename) {
+	var str = JSON.stringify(objects, function(key, obj) {
+		if(!key) return obj;
+		if(obj instanceof Array) return obj;
+		if(typeof obj !== 'object') return obj;
+
+		var saved_obj = {};
+		for(var attr in obj) {
+			if(!obj.hasOwnProperty(attr)) continue;
+			if(obj[attr] instanceof Array) {
+				saved_obj[attr] = [];
+				for(var i = 0; i < obj[attr].length; i++) {
+					if(obj[attr][i] && typeof obj[attr][i] === 'object' && 'id' in obj[attr][i]) {
+						saved_obj[attr][i] = stub(obj[attr][i]);
+					} else {
+						saved_obj[attr][i] = obj[attr][i];
+					}
+				}
+			} else if(obj[attr] && typeof obj[attr] === 'object' && 'id' in obj[attr]) {
+				saved_obj[attr] = stub(obj[attr]);
+			} else {
+				saved_obj[attr] = obj[attr];
+			}
+		}
+		return saved_obj;
+	}, '    ');
+	fs.writeFile(filename, str, function(err) {
+		if(err) {
+			logger.error(err);
+			console.error(err);
+		}
+
+		logger.info("Saved game state to "+filename);
+	});
+};
+
+var load = global.load = function(filename) {
+	var str = fs.readFileSync(filename);
+	objects = JSON.parse(str);
+	for(var id in objects) {
+		var obj = objects[id];
+		for(var attr in obj) {
+			if(!obj.hasOwnProperty(attr)) continue;
+			if(attr == 'position' || attr == 'velocity') {
+				obj[attr] = vectors.create(obj[attr]);
+			} else if(obj[attr] instanceof Array) {
+				for(var i = 0; i < obj[attr].length; i++) {
+					if(obj[attr][i] && typeof obj[attr][i] === 'object' && 'id' in obj[attr][i]) {
+						obj[attr][i] = stub2object(obj[attr][i]);
+					}
+				}
+			} else if(obj[attr] && typeof obj[attr] === 'object' && 'id' in obj[attr]) {
+				obj[attr] = stub2object(obj[attr]);
+			}
+		}
+	}
+	logger.info("Loaded game state from "+filename);
+};
+
+if(fs.existsSync("autosave.json")) {
+	console.log("Resume from autosave");
+	load("autosave.json");
+}
+
+setInterval(function() {
+	if(fs.existsSync("autosave30.json"))
+		fs.unlinkSync("autosave30.json");
+	for(var i = 29; i > 0; i--) {
+		if(fs.existsSync("autosave"+i+".json"))
+			fs.renameSync("autosave"+i+".json", "autosave"+(i+1)+".json");
+	}
+	if(fs.existsSync("autosave.json"))
+		fs.renameSync("autosave.json", "autosave1.json");
+	save("autosave.json");
+}, 10000);
 
 apply_secret_force = function(object) {
 	for(var i = 0; i < 3; ++i) {
