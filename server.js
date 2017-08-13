@@ -83,11 +83,24 @@ var make_asteroid = function() {
 	};
 };
 
+var make_planet = function() {
+	var planet = make_asteroid();
+	planet.sprite = '/attractor151.png';
+	delete planet.velocity;
+	return planet;
+};
+
 for(var i = 0; i < 60; ++i) {
 	var asteroid = reg(make_asteroid());
 	asteroid.position = vectors.random2(3000);
 	asteroid.velocity = vectors.random2(5);
 	asteroids.push(asteroid);
+}
+
+for(var i = 0; i < 100; ++i) {
+	var planet = reg(make_planet());
+	planet.position = vectors.random2(3000);
+	planet.planet_energy = 0;
 }
 
 var get_or_create_player = function(hash) {
@@ -128,10 +141,6 @@ var random_color = function() {
 var stub = function(obj) {
 	if(obj) return { id: obj.id };
 };
-
-attractor = reg(make_asteroid());
-attractor.sprite = '/attractor151.png';
-delete attractor.velocity;
 
 apply_secret_force = function(object) {
 	for(var i = 0; i < 3; ++i) {
@@ -363,14 +372,8 @@ io.sockets.on('connection', function (socket) {
 		return callback('success', { avatar_list: Object.keys(player.avatars) });
 	});
 
-	var find_target = function(command) {
-		if(!command) {
-			throw { message: 'Command didn\'t have parameters defined.' };
-		}
-		if(!command.target) {
-			throw { code: 5, message: 'Command didn\'t have `target` defined.' };
-		}
-		if(!('' + command.target).match(/[0-9A-F]{32}/i)) {
+	var find_player_object = function(objid) {
+		if(!('' + objid).match(/[0-9A-F]{32}/i)) {
 			throw { code: 6, message: 'Target hash is not a valid identifier (should match /[0-9A-F]{32}/i).' };
 		}
 
@@ -387,7 +390,7 @@ io.sockets.on('connection', function (socket) {
 			count += 1;
 			var current = objects[id];
 			if(typeof current === 'undefined') continue;
-			if(id == command.target) return current;
+			if(id == objid) return current;
 			if(current.parent) {
 				queue.push(current.parent.id);
 			}
@@ -400,6 +403,17 @@ io.sockets.on('connection', function (socket) {
 			}
 		}
 		throw { code: 7, message: 'Command target not found connected to any avatar (searched ' + count + ' objects).' };
+	};
+
+	var find_target = function(command) {
+		if(!command) {
+			throw { message: 'Command didn\'t have parameters defined.' };
+		}
+		if(!command.target) {
+			throw { code: 5, message: 'Command didn\'t have `target` defined.' };
+		}
+
+		return find_player_object(command.target);
 	};
 
 	var check_feature = function(object, feature) {
@@ -490,7 +504,7 @@ io.sockets.on('connection', function (socket) {
 	});
 
 
-	var radio_copy_fields = 'id sprite user_sprite position velocity'.split(' ');
+	var radio_copy_fields = 'id sprite user_sprite position velocity planet_energy'.split(' ');
 	on('radio scan', function(target, data) {
 		check_feature(target, 'radio');
 		var results = [];
@@ -503,6 +517,8 @@ io.sockets.on('connection', function (socket) {
 			if(d <= target.radio_range) {
 				var report = {};
 				radio_copy_fields.forEach(function(key) { if(key in object) report[key] = object[key]; });
+				if(object.owner)
+					report.friendly = (object.owner == player.id);
 				results.push(report);
 			}
 		}
@@ -549,6 +565,10 @@ io.sockets.on('connection', function (socket) {
 
 		if(closest_dist > left_range) {
 			throw { message: 'No valid object found around grab position.' };
+		}
+
+		if (closest.sprite == '/attractor151.png') {
+			throw { message: 'Can\'t grab planets' }
 		}
 
 		closest.grabbed_by = target;
@@ -983,6 +1003,62 @@ io.sockets.on('connection', function (socket) {
 		battery.battery_energy -= used_energy;
 
 		return { 'used_energy': used_energy, 'generated_materials': generated_materials };
+	});
+
+	// TODO: Less copy-paste
+	socket.on('planet takeover', function(data, callback) {
+		log_in('planet takeover');
+		try {
+			if(!data) {
+				throw { message: 'Command didn\'t have parameters defined.' };
+			}
+			if(!data.target) {
+				throw { code: 5, message: 'Command didn\'t have `target` defined.' };
+			}
+			if(!('' + data.target).match(/[0-9A-F]{32}/i)) {
+				throw { code: 6, message: 'Target hash is not a valid identifier (should match /[0-9A-F]{32}/i).' };
+			}
+			var target = objects[data.target];
+			if(!('planet_energy' in target))
+				throw { code: 8, message: 'Target is not a planet' };
+			var ok = false;
+			for(var id in player.avatars) {
+				if(common.get_position(player.avatars[id]).dist(common.get_position(target)) < 100)
+					ok = true;
+			}
+			if(!ok)
+				throw { code: 7, message: 'Command target is too far from avatar (max 100)' };
+
+			var battery = find_player_object(data.energy_source);
+			check(data.energy, "Energy must be a number").isFloat();
+			check(data.energy, "Energy must be >= 0").min(0);
+			var energy = data.energy;
+
+			if(target.planet_energy > energy) {
+				throw { message: 'Not enough energy to take over the planet (tried '+energy+', needs at least '+target.planet_energy+')' };
+			}
+
+			var used_energy = energy;
+			if(target.owner == player.id)
+				used_energy -= target.planet_energy;
+
+			battery_check(battery, used_energy);
+
+			target.owner = player.id;
+			target.planet_energy = energy;
+			battery.battery_energy -= used_energy;
+
+			var r = { planet_energy: energy, used_energy: used_energy };
+			if(callback) {
+				callback('success', r);
+			}
+		} catch(e) {
+			if(callback) {
+				callback('fail', { source: 'planet takeover', message: e.message, stack: e.stack ? e.stack.split("\n") : undefined });
+			} else {
+				socket.emit('fail', { source: 'planet takeover', message: e.message, stack: e.stack ? e.stack.split("\n") : undefined });
+			}
+		}
 	});
 
 });

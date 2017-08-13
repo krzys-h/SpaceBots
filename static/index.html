@@ -473,6 +473,9 @@ li:nth-child(2n-1) {
 <template id="enriching_reactor_controls">
 	<div class="command"><span class="run">reactor_enrich</span>(<span class="param" title="resource" contenteditable>25</span>, <span class="param" title="target_resource" contenteditable>24</span>, <span class="param" title="amount" contenteditable>10</span>)</div>
 </template>
+<template id="planet_controls">
+	<div class="command"><span class="run">planet_takeover</span>("<span class="param set_this_id" title="planet"></span>", <span class="param" title="energy" contenteditable>100</span>)</div>
+</template>
 <script src="promise-0.1.1.min.js"></script>
 <script src="socket.io/socket.io.js"></script>
 <script src="vectors.js"></script>
@@ -495,5 +498,6 @@ li:nth-child(2n-1) {
 <script src="assembler.js"></script>
 <script src="spectrometer.js"></script>
 <script src="reactors.js"></script>
+<script src="planets.js"></script>
 <script src="user_sprites.js"></script>
 <script src="gui.js"></script>

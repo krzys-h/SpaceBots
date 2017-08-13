@@ -310,6 +310,14 @@ var tick = function tick(time) {
 			ctx.restore();
 		}
 
+		if('friendly' in obj) {
+			ctx.globalAlpha = 0.5;
+			ctx.fillStyle = obj.friendly ? 'green' : 'red';
+			ctx.beginPath();
+			ctx.arc(pos.getScreenX(), pos.getScreenY(), 50, 0, 2*Math.PI);
+			ctx.fill();
+		}
+
 		var a = 1 - (time - obj.fetch_time)/2;
 		if(a <= 0) continue;
 		ctx.globalAlpha = a;
@@ -741,6 +749,21 @@ var show_details_for = function(object, event) {
 		details.id = object.id;
 		document.getElementById('overlay').appendChild(details);
 
+		if ('planet_energy' in object) {
+			var controls_div = details.querySelector('.controls');
+
+			var template = document.getElementById("planet_controls").content;
+			template.querySelectorAll('.set_this_id').text(object.id.substr(0, 4));
+			controls_div.appendChild(template.cloneNode(true));
+
+			var desc = 'Current energy: ' + Math.round(object.planet_energy);
+			controls_div.appendChild(document.createTextNode(desc));
+			controls_div.appendChild(document.createElement('br'));
+
+			var desc = 'Friendly: ' + ('friendly' in object ? (object.friendly ? 'yes' : 'no') : 'no owner');
+			controls_div.appendChild(document.createTextNode(desc));
+		}
+
 
 		var view = details.querySelector('canvas.sprite');
 		var cx = view.getContext('2d');
@@ -1076,7 +1099,7 @@ document.addEventListener('mousedown', function(e) {
 			if(!details || !details.classList) details = null; // TODO: ?!?!
 			if(details) {
 				var feature = details.querySelector('.controls').dataset.feature;
-				if(!window[feature] || window[feature].id != details.id) {
+				if(feature && (!window[feature] || window[feature].id != details.id)) {
 					window[feature] = common.get(details.id);
 					onscreen_console.log("Changed active " + feature + " to " + details.id);
 				}
