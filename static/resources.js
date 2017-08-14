@@ -52,7 +52,7 @@
 	};
 
 	var make_empty = e.make_empty = function() {
-		return init_arr(new Array(100));
+		return init_arr(new Array(100).fill(0));
 	};
 
 	var make_copy = e.make_copy = function(o) {
@@ -70,7 +70,6 @@
 				--i;
 				continue;
 			}
-			if(typeof arr[pos] === 'undefined') arr[pos] = 0;
 			arr[pos] += t1;
 		}
 		return arr;
