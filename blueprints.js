@@ -301,14 +301,6 @@
 				if(Array.isArray(blueprint[feature])) continue;
 				object.features[feature] = true;
 
-				if(typeof object.sprite === 'undefined') {
-					if(feature in sprites) {
-						object.sprite = sprites[feature];
-					} else {
-						object.sprite = '/' + feature + '.png';
-					}
-				}
-
 				for(var prop in blueprint[feature]) {
 					val = blueprint[feature][prop];
 					func = tradeoffs[feature][prop];
@@ -322,6 +314,21 @@
 
 			if(constructors[feature]) {
 				constructors[feature](blueprint, object);
+			}
+		}
+
+		if(object.features.hub && !object.sprite)
+			object.sprite = '/hull.png';
+		if(object.features.avatar && !object.sprite)
+			object.sprite = '/avatar.png';
+		for(var feature in object.features) {
+			if(!object.sprite) {
+				if(feature in sprites) {
+					object.sprite = sprites[feature];
+				} else {
+					if(require('fs').existsSync('static/' + feature + '.png')) // TODO: don't use the filesystem here...
+						object.sprite = '/' + feature + '.png';
+				}
 			}
 		}
 
