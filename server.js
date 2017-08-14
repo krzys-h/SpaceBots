@@ -147,7 +147,7 @@ var stub2object = function(stub) {
 
 var save = global.save = function(filename) {
 	var str = JSON.stringify(objects, function(key, obj) {
-		if(!key) return obj;
+		if(!key || !obj) return obj;
 		if(obj instanceof Array) return obj;
 		if(typeof obj !== 'object') return obj;
 
@@ -183,7 +183,7 @@ var save = global.save = function(filename) {
 
 var load = global.load = function(filename) {
 	var str = fs.readFileSync(filename);
-	objects = JSON.parse(str);
+	global.objects = objects = JSON.parse(str);
 	for(var id in objects) {
 		var obj = objects[id];
 		for(var attr in obj) {
@@ -209,7 +209,7 @@ if(fs.existsSync("autosave.json")) {
 	load("autosave.json");
 }
 
-setInterval(function() {
+var do_save = global.do_save = function() {
 	if(fs.existsSync("autosave30.json"))
 		fs.unlinkSync("autosave30.json");
 	for(var i = 29; i > 0; i--) {
@@ -219,7 +219,9 @@ setInterval(function() {
 	if(fs.existsSync("autosave.json"))
 		fs.renameSync("autosave.json", "autosave1.json");
 	save("autosave.json");
-}, 10000);
+};
+setInterval(do_save, 10000);
+process.on('exit', do_save);
 
 apply_secret_force = function(object) {
 	for(var i = 0; i < 3; ++i) {
