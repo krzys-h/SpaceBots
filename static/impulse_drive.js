@@ -160,13 +160,13 @@ var navigate_tick = function() {
 		if(target_pos) {
 			var diff = vectors.create(target_pos).subtract(engine_pos);
 			distance = diff.len();
-			target_velocity.add(diff, 0.1);
+			target_velocity.add(diff, 0.2);
 		}
 
 		if('velocity' in destination) {
 			target_velocity.add( destination.velocity );
 
-			if(distance < 10) {
+			if(distance < 5) {
 				target_velocity = destination.velocity;
 			}
 		}
@@ -182,7 +182,7 @@ var navigate_tick = function() {
 			});
 		}
 
-		if((distance < 10) && (velocity_diff < 0.5)) {
+		if((distance < 5) && (velocity_diff < 0.5)) {
 			radio_scanner.remove_callback(navigate_tick);
 			console.log("Destination reached.");
 			radio_scanner.remove_callback(navigate_tick);
