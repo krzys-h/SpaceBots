@@ -221,7 +221,7 @@ var do_save = global.do_save = function() {
 	save("autosave.json");
 };
 setInterval(do_save, 10000);
-process.on('exit', do_save);
+//process.on('exit', do_save);
 
 apply_secret_force = function(object) {
 	for(var i = 0; i < 3; ++i) {
