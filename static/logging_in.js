@@ -8,7 +8,7 @@ var socket;
 var connect = function() {
 	return new Promise(function(resolve, reject) {
 
-		socket = io.connect();
+		socket = io.connect(localStorage.server_ip);
 
 		// We use the 'connect' event to execute action right after
 		// connection is created.
