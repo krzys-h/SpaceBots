@@ -18,7 +18,7 @@ console.log('%cWelcome to SpaceBots! For a complete tutorial, navigate to ' +
 
 // To stop intro message from showing up every time you refresh the
 // page, try writing following command into the console:
-// localStarage.inhibitIntro = 'true';
+// localStorage.inhibitIntro = 'true';
 
 // If you set it this way, it will remove #intro element.
 if(localStorage.inhibitIntro) {
