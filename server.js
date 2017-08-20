@@ -770,6 +770,9 @@ io.sockets.on('connection', function (socket) {
 		if(reaction_mass > target.impulse_drive_payload) {
 			throw { code: 12, message: 'Ordered payload exceeds drive capabilities.' };
 		}
+		if(reaction_mass <= 0) {
+			throw { message: 'Reaction mass must be >= 0' };
+		}
 		if(cmd.impulse > target.impulse_drive_impulse) {
 			throw { code: 13, message: 'Ordered impulse exceeds drive capabilities.' };
 		}
