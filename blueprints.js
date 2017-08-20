@@ -320,7 +320,7 @@
 		if(object.features.hub && !object.sprite)
 			object.sprite = '/hull.png';
 		if(object.features.avatar && !object.sprite)
-			object.sprite = '/avatar.png';
+			object.sprite = '/avatar28.png';
 		for(var feature in object.features) {
 			if(!object.sprite) {
 				if(feature in sprites) {
