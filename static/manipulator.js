@@ -2,7 +2,7 @@
 var grab = function(x, y, z) {
 	var json = { target: manipulator.id };
 	if(x || y || z) json.position = [x, y, z];
-	send('manipulator grab', json).then(function(data) {
+	return send('manipulator grab', json).then(function(data) {
 		objects[data.id].manipulator_slot = stub2object(data.manipulator_slot);
 	});
 };
