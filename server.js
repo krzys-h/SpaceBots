@@ -70,8 +70,6 @@ var place = function(host, guest, pos) {
 	return guest;
 };
 
-var asteroids = global.asteroids = [];
-
 var make_asteroid = function() {
 	return {
 		id: common.uid(),
@@ -94,8 +92,19 @@ for(var i = 0; i < 60; ++i) {
 	var asteroid = reg(make_asteroid());
 	asteroid.position = vectors.random2(3000);
 	asteroid.velocity = vectors.random2(5);
-	asteroids.push(asteroid);
 }
+
+setInterval(function spawn_asteroids() {
+	var num_asteroids = 0;
+	for(var obj in objects)
+		if(objects[obj].sprite == '/asteroid100.png' && !objects[obj].parent)
+			num_asteroids++;
+	for(var i = num_asteroids; i < 60; ++i) {
+		var asteroid = reg(make_asteroid());
+		asteroid.position = vectors.random2(3000);
+		asteroid.velocity = vectors.random2(5);
+	}
+}, 1000);
 
 for(var i = 0; i < 100; ++i) {
 	var planet = reg(make_planet());
