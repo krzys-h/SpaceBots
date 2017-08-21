@@ -590,7 +590,31 @@ io.sockets.on('connection', function (socket) {
 		if(str.length > 140) {
 			throw { code: 1, message: 'JSON.stringify(message) should have at most 140 characters' };
 		}
-		socket.broadcast.emit('broadcast', { source: stub(common.get_root(target)), message: data.message });
+
+		if(data.reciever) {
+			if(!('' + data.reciever).match(/[0-9A-F]{32}/i)) {
+				throw { message: 'Reciever hash is not a valid identifier (should match /[0-9A-F]{32}/i).' };
+			}
+			if(!(data.reciever in objects)) {
+				throw { message: 'Reciever object doesn\'t exist.' };
+			}
+			var players = [];
+			var cc = common.walk(objects[data.reciever]);
+			for(var playerid in objects) {
+				if (!('avatars' in objects[playerid]))
+					continue;
+				for(var avatar in objects[playerid].avatars) {
+					if (avatar in cc) {
+						players[avatar] = objects[playerid].avatars[avatar];
+					}
+				}
+			}
+			for(var playerid in players) {
+				io.sockets.in(playerid).emit('broadcast', { source: stub(common.get_root(target)), message: data.message });
+			}
+		} else {
+			socket.broadcast.emit('broadcast', { source: stub(common.get_root(target)), message: data.message });
+		}
 	});
 
 
