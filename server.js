@@ -1140,7 +1140,9 @@ io.sockets.on('connection', function (socket) {
 				throw { code: 8, message: 'Target is not a planet' };
 			var ok = false;
 			for(var id in player.avatars) {
-				if(common.get_position(player.avatars[id]).dist(common.get_position(target)) < 100)
+				// TODO: Fix avatar loading
+				//if(common.get_position(player.avatars[id]).dist(common.get_position(target)) < 100)
+				if(common.get_position(objects[id]).dist(common.get_position(target)) < 100)
 					ok = true;
 			}
 			if(!ok)
