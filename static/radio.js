@@ -76,10 +76,10 @@ var radio_scanner = {
 };
 
 var messages = {};
-var broadcast = function(msg, reciever) {
-	reciever = reciever || null;
-	if(reciever) reciever = common.get(reciever);
-	return send('radio broadcast', { target: radio.id, message: msg, reciever: reciever.id }).then(function() {
+var broadcast = function(msg, receiver) {
+	receiver = receiver || null;
+	if(receiver) receiver = common.get(receiver);
+	return send('radio broadcast', { target: radio.id, message: msg, receiver: receiver.id }).then(function() {
 		onscreen_console.log("Sent broadcast from " + radio.id + ": " + JSON.stringify(msg));
 	});
 };

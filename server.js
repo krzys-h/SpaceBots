@@ -592,14 +592,14 @@ io.sockets.on('connection', function (socket) {
 		}
 
 		if(data.reciever) {
-			if(!('' + data.reciever).match(/[0-9A-F]{32}/i)) {
+			if(!('' + data.receiver).match(/[0-9A-F]{32}/i)) {
 				throw { message: 'Reciever hash is not a valid identifier (should match /[0-9A-F]{32}/i).' };
 			}
-			if(!(data.reciever in objects)) {
+			if(!(data.receiver in objects)) {
 				throw { message: 'Reciever object doesn\'t exist.' };
 			}
 			var players = [];
-			var cc = common.walk(objects[data.reciever]);
+			var cc = common.walk(objects[data.receiver]);
 			for(var playerid in objects) {
 				if (!('avatars' in objects[playerid]))
 					continue;
