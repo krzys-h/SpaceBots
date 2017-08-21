@@ -79,7 +79,7 @@ var messages = {};
 var broadcast = function(msg, receiver) {
 	receiver = receiver || null;
 	if(receiver) receiver = common.get(receiver);
-	return send('radio broadcast', { target: radio.id, message: msg, receiver: receiver.id }).then(function() {
+	return send('radio broadcast', { target: radio.id, message: msg, receiver: receiver ? receiver.id : null }).then(function() {
 		onscreen_console.log("Sent broadcast from " + radio.id + ": " + JSON.stringify(msg));
 	});
 };
