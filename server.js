@@ -591,7 +591,7 @@ io.sockets.on('connection', function (socket) {
 			throw { code: 1, message: 'JSON.stringify(message) should have at most 140 characters' };
 		}
 
-		if(data.reciever) {
+		if(data.receiver) {
 			if(!('' + data.receiver).match(/[0-9A-F]{32}/i)) {
 				throw { message: 'Reciever hash is not a valid identifier (should match /[0-9A-F]{32}/i).' };
 			}
