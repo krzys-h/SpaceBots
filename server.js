@@ -814,6 +814,9 @@ io.sockets.on('connection', function (socket) {
 		}
 		var energy = reaction_mass * cmd.impulse;
 		battery_check(energy_source, energy);
+		if(vectors.create(cmd.destination).dist(common.get_position(target)) > 2000) {
+			throw { message: 'Cannot shoot that far.' };
+		}
 
 		var root = common.get_root(target);
 		var d = root.position.dist(cmd.destination);
