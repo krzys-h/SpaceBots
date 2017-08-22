@@ -17,7 +17,9 @@ var radio_scanner = {
 	},
 	remove_callback: function(cb) {
 		var i = radio_scanner.callbacks.indexOf(cb);
-		radio_scanner.callbacks.splice(i, 1);
+		if(i >= 0) {
+			radio_scanner.callbacks.splice(i, 1);
+		}
 	},
 	loop: function radio_loop() {
 		radio_scanner.timeout_id = undefined;
