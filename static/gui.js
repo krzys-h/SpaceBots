@@ -485,8 +485,6 @@ var draw_explosions = function(time) {
 		var frames = get_frame_count(sprite_url);
 
 		var dt = time - e.reported;
-		if(i == 10)
-			console.log(i, time, e.reported, e.duration, dt);
 		if(dt > e.duration) {
 			explosions.splice(i, 1);
 		} else {
@@ -1053,8 +1051,8 @@ canvas.addEventListener('mouseup', function(e) {
 	}
 }, false);
 
-canvas.addEventListener('mousewheel', function(e) {
-	var f = 1 + e.wheelDelta / 1000;
+canvas.addEventListener('wheel', function(e) {
+	var f = 1 + (navigator.userAgent.toLowerCase().indexOf('firefox') > -1 ? 10 : 1) * e.deltaY / 1000;
 	scale.target *= f;
 }, false);
 
