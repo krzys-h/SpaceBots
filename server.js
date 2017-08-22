@@ -235,12 +235,12 @@ setInterval(do_save, 10000);
 apply_secret_force = function(object) {
 	for(var i = 0; i < 3; ++i) {
 		var v = object.position[i];
-		if(v < -2000) {
-			object.position[i] = - v - 4000;
+		if(v < -3000) {
+			object.position[i] = - v - 6000;
 			object.velocity[i] = - object.velocity[i];
 		}
-		if(v > 2000) {
-			object.position[i] = - v + 4000;
+		if(v > 3000) {
+			object.position[i] = - v + 6000;
 			object.velocity[i] = - object.velocity[i];
 		}
 	}
