@@ -3,6 +3,7 @@
 SpaceBots is a programming game where players employ their in-browser javascript engines to drive hordes of robots and wage battles in space.
 
 ![screenshot](screenshot.png)
+![screenshot2](screenshot2.png)
 
 ## Quickstart guide
 
